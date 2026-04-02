@@ -1,9 +1,123 @@
-// ==================== 数据存储 ====================
+// ==================== 云同步数据存储 ====================
+let autoSyncTimer = null
+
+function getSyncConfig() {
+  return {
+    token: localStorage.getItem('github_token') || '',
+    gistId: localStorage.getItem('gist_id') || '',
+    autoSync: localStorage.getItem('auto_sync') !== 'false'
+  }
+}
+
 function getAccounts() {
   return JSON.parse(localStorage.getItem('accounts') || '[]')
 }
+
 function saveAccountList(list) {
   localStorage.setItem('accounts', JSON.stringify(list))
+  const config = getSyncConfig()
+  if (config.autoSync && config.token && config.gistId) {
+    clearTimeout(autoSyncTimer)
+    autoSyncTimer = setTimeout(() => {
+      syncToCloud(true)
+    }, 2000) // 延迟2秒自动上传，防止高频操作
+  }
+}
+
+// ---------------- 云同步核心逻辑 ----------------
+async function syncToCloud(isAuto = false) {
+  const config = getSyncConfig()
+  if (!config.token || !config.gistId) {
+    if (!isAuto) showToast('请先配置正确的 Token 和 Gist ID')
+    return
+  }
+  
+  if (!isAuto) showToast('正在上传数据到云端...')
+  
+  const accounts = localStorage.getItem('accounts') || '[]'
+  const allTags = localStorage.getItem('allTags') || '[]'
+  const dataPayload = { accounts: JSON.parse(accounts), allTags: JSON.parse(allTags) }
+  
+  try {
+    const res = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${config.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        description: "Account Manager Sync Data",
+        files: {
+          "accounts_data.json": {
+            content: JSON.stringify(dataPayload, null, 2)
+          }
+        }
+      })
+    })
+    
+    if (res.ok) {
+      if (!isAuto) showToast('✅ 成功同步到云端！')
+    } else {
+      const err = await res.json()
+      console.error(err)
+      if (!isAuto) showToast('❌ 上传失败，请检查凭证是否正确')
+    }
+  } catch (error) {
+    console.error(error)
+    if (!isAuto) showToast('❌ 网络请求失败')
+  }
+}
+
+async function syncFromCloud() {
+  const config = getSyncConfig()
+  if (!config.token || !config.gistId) {
+    showToast('请先配置正确的 Token 和 Gist ID')
+    return
+  }
+  
+  showToast('正在从云端拉取数据...')
+  try {
+    const res = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${config.token}`
+      }
+    })
+    
+    if (res.ok) {
+      const gist = await res.json();
+      const file = gist.files["accounts_data.json"];
+      if (file && file.content) {
+        const data = JSON.parse(file.content);
+        if (data.accounts) localStorage.setItem('accounts', JSON.stringify(data.accounts));
+        if (data.allTags) localStorage.setItem('allTags', JSON.stringify(data.allTags));
+        
+        renderList();
+        showToast('✅ 成功拉取并覆盖本地数据！')
+      } else {
+        showToast('❌ Gist 中没找到 accounts_data.json')
+      }
+    } else {
+      showToast('❌ 拉取失败，请检查凭证是否正确')
+    }
+  } catch (error) {
+    console.error(error)
+    showToast('❌ 网络请求失败')
+  }
+}
+
+function saveSyncConfig() {
+  const token = document.getElementById('syncToken').value.trim()
+  const gistId = document.getElementById('syncGistId').value.trim()
+  localStorage.setItem('github_token', token)
+  localStorage.setItem('gist_id', gistId)
+  showToast('✅ 凭证保存成功')
+}
+
+function saveAutoSync(checked) {
+  localStorage.setItem('auto_sync', checked ? 'true' : 'false')
 }
 function getAllTags() {
   return JSON.parse(localStorage.getItem('allTags') || '[]')
@@ -121,8 +235,17 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'))
   document.getElementById(`page-${tab}`).classList.add('active')
   document.querySelector(`[data-tab="${tab}"]`).classList.add('active')
+  
   if (tab === 'list') renderList()
   if (tab === 'generator') initGeneratorPage()
+  if (tab === 'sync') initSyncPage()
+}
+
+function initSyncPage() {
+  const config = getSyncConfig()
+  document.getElementById('syncToken').value = config.token
+  document.getElementById('syncGistId').value = config.gistId
+  document.getElementById('autoSyncCheckbox').checked = config.autoSync
 }
 
 // ==================== 列表页 ====================

@@ -27,6 +27,10 @@
       <span class="tab-icon">✦</span>
       <span>生成账号</span>
     </div>
+    <div class="tab-item" data-tab="sync" onclick="switchTab('sync')">
+      <span class="tab-icon">☁</span>
+      <span>云同步</span>
+    </div>
   </nav>
 
   <!-- 账号列表页 -->
@@ -71,6 +75,35 @@
       </div>
 
       <button class="btn-primary" onclick="doSaveAccounts()">生成并保存</button>
+    </div>
+  </div>
+
+  <!-- 云同步页 -->
+  <div id="page-sync" class="page">
+    <div class="nav-bar">
+      <span class="nav-title">云同步设置</span>
+      <button onclick="forceRefresh()" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); background:none; border:none; color:#007AFF; font-size:14px; cursor:pointer;">刷新更新</button>
+    </div>
+    <div class="page-content">
+      <div class="card">
+        <div class="section-title">GitHub Gist 凭证</div>
+        <input type="text" id="syncToken" class="info-input" placeholder="输入 GitHub Token" style="margin-bottom:10px" />
+        <input type="text" id="syncGistId" class="info-input" placeholder="输入 Gist ID" style="margin-bottom:10px" />
+        <button class="btn-outline" onclick="saveSyncConfig()" style="margin-top:10px">保存凭证</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">手动同步操作</div>
+        <button class="btn-outline" onclick="syncFromCloud()" style="margin-bottom:10px; color: #007AFF; border-color: #007AFF;">⬇ 拉取云端数据 (覆盖本地)</button>
+        <button class="btn-outline" onclick="syncToCloud()" style="margin-bottom:10px; color: #FF3B30; border-color: #FF3B30;">⬆ 上传本地数据 (覆盖云端)</button>
+      </div>
+      
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#333;">
+          <span style="flex:1; padding-right:10px;">发生修改时自动上传云端备份</span>
+          <input type="checkbox" id="autoSyncCheckbox" style="width:20px;height:20px;accent-color:#007AFF" onchange="saveAutoSync(this.checked)" checked />
+        </div>
+      </div>
     </div>
   </div>
 
