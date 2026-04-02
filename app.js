@@ -406,3 +406,21 @@ function showToast(msg) {
 // ==================== 初始化 ====================
 renderList()
 initGeneratorPage()
+
+// ==================== 强制刷新 ====================
+function forceRefresh() {
+  showToast('正在获取最新代码并刷新...');
+  if ('serviceWorker' in navigator) {
+    caches.keys().then(function(names) {
+      for (let name of names) caches.delete(name);
+    });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister();
+      }
+      setTimeout(() => window.location.reload(true), 500);
+    });
+  } else {
+    setTimeout(() => window.location.reload(true), 500);
+  }
+}

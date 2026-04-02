@@ -31,7 +31,10 @@
 
   <!-- 账号列表页 -->
   <div id="page-list" class="page active">
-    <div class="nav-bar"><span class="nav-title">账号列表</span></div>
+    <div class="nav-bar">
+      <span class="nav-title">账号列表</span>
+      <button onclick="forceRefresh()" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); background:none; border:none; color:#007AFF; font-size:14px; cursor:pointer;">刷新更新</button>
+    </div>
     <!-- 注册状态分栏 -->
     <div class="seg-control">
       <div class="seg-item active" id="seg-unregistered" onclick="switchSeg('unregistered')">未注册</div>
@@ -44,7 +47,10 @@
 
   <!-- 生成账号页 -->
   <div id="page-generator" class="page">
-    <div class="nav-bar"><span class="nav-title">生成账号</span></div>
+    <div class="nav-bar">
+      <span class="nav-title">生成账号</span>
+      <button onclick="forceRefresh()" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); background:none; border:none; color:#007AFF; font-size:14px; cursor:pointer;">刷新更新</button>
+    </div>
     <div class="page-content">
 
       <!-- 预览 -->

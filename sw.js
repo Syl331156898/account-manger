@@ -1,4 +1,4 @@
-const CACHE = 'v1'
+const CACHE = 'v2'
 const FILES = ['./', './index.html', './app.js', './style.css']
 
 self.addEventListener('install', e => {
@@ -14,5 +14,19 @@ self.addEventListener('activate', e => {
 })
 
 self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)))
+  // Network first with offline fallback strategy
+  e.respondWith(
+    fetch(e.request).then(response => {
+      // Don't cache browser extensions or non-HTTP schemas
+      if (!e.request.url.startsWith('http')) return response;
+      
+      const resClone = response.clone();
+      caches.open(CACHE).then(cache => {
+        cache.put(e.request, resClone);
+      });
+      return response;
+    }).catch(() => {
+      return caches.match(e.request);
+    })
+  );
 })
