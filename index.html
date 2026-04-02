@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="账号管理" />
+  <title>账号管理</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+    }
+  </script>
+</head>
+<body>
+  <!-- 底部导航 -->
+  <nav class="tab-bar">
+    <div class="tab-item active" data-tab="list" onclick="switchTab('list')">
+      <span class="tab-icon">☰</span>
+      <span>账号列表</span>
+    </div>
+    <div class="tab-item" data-tab="generator" onclick="switchTab('generator')">
+      <span class="tab-icon">✦</span>
+      <span>生成账号</span>
+    </div>
+  </nav>
+
+  <!-- 账号列表页 -->
+  <div id="page-list" class="page active">
+    <div class="nav-bar"><span class="nav-title">账号列表</span></div>
+    <!-- 注册状态分栏 -->
+    <div class="seg-control">
+      <div class="seg-item active" id="seg-unregistered" onclick="switchSeg('unregistered')">未注册</div>
+      <div class="seg-item" id="seg-registered" onclick="switchSeg('registered')">已注册</div>
+      <div class="seg-item" id="seg-sold" onclick="switchSeg('sold')">号已出</div>
+    </div>
+    <div id="tagFilter" class="tag-scroll"></div>
+    <div id="accountList" class="list-container"></div>
+  </div>
+
+  <!-- 生成账号页 -->
+  <div id="page-generator" class="page">
+    <div class="nav-bar"><span class="nav-title">生成账号</span></div>
+    <div class="page-content">
+
+      <!-- 预览 -->
+      <div class="card">
+        <div class="section-title">预览（姓名、密码自动随机生成）</div>
+        <div id="previewContent"></div>
+        <button class="btn-outline" onclick="refreshPreview()">换一个</button>
+      </div>
+
+      <!-- 批量数量 -->
+      <div class="card">
+        <div class="section-title">批量生成数量</div>
+        <div class="stepper">
+          <button class="stepper-btn" onclick="changeBatch(-1)">－</button>
+          <span id="batchNum">1</span>
+          <button class="stepper-btn" onclick="changeBatch(1)">＋</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="doSaveAccounts()">生成并保存</button>
+    </div>
+  </div>
+
+  <!-- 详情弹窗 -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-mask" onclick="closeDetail()"></div>
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">账号详情</span>
+        <span class="modal-close" onclick="closeDetail()">✕</span>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
