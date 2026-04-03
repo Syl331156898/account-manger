@@ -239,6 +239,7 @@ function switchTab(tab) {
   if (tab === 'list') renderList()
   if (tab === 'generator') initGeneratorPage()
   if (tab === 'sync') initSyncPage()
+  if (tab === 'register') initRegisterPage()
 }
 
 function initSyncPage() {
@@ -533,7 +534,35 @@ function showToast(msg) {
 renderList()
 initGeneratorPage()
 
-// ==================== 强制刷新 ====================
+// ==================== 注册辅助页 ====================
+function initRegisterPage() {
+  const accounts = getAccounts()
+  const first = accounts.find(a => !a.registered && !a.sold)
+  const el = document.getElementById('registerAccountInfo')
+  if (!first) {
+    el.innerHTML = '<div class="empty" style="padding:20px 0">暂无未注册账号</div>'
+    return
+  }
+  el.innerHTML = `
+    <div class="info-row">
+      <span class="info-label">邮箱</span>
+      <span class="info-value">${first.email}</span>
+      <button class="copy-btn" onclick="copyText('${first.email}', '邮箱')">复制</button>
+    </div>
+    <div class="info-row">
+      <span class="info-label">密码</span>
+      <span class="info-value">${first.password}</span>
+      <button class="copy-btn" onclick="copyText('${first.password}', '密码')">复制</button>
+    </div>
+    <div class="info-row">
+      <span class="info-label">用户名</span>
+      <span class="info-value">${first.username}</span>
+      <button class="copy-btn" onclick="copyText('${first.username}', '用户名')">复制</button>
+    </div>
+  `
+}
+
+
 function forceRefresh() {
   showToast('正在获取最新代码并刷新...');
   if ('serviceWorker' in navigator) {

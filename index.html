@@ -121,10 +121,23 @@
 
   <!-- 注册页 -->
   <div id="page-register" class="page">
-    <div class="nav-bar">
-      <span class="nav-title">去注册</span>
+    <div class="nav-bar"><span class="nav-title">去注册</span></div>
+    <div class="page-content">
+      <div class="card" style="text-align:center;">
+        <div class="section-title" style="margin-bottom:16px;">点击前请先复制好账号信息</div>
+        <a href="https://github.com/signup" target="_blank"
+           onclick="event.preventDefault(); window.open('https://github.com/signup')"
+           style="display:block; background:#24292f; color:#fff; border-radius:10px; padding:14px; font-size:16px; text-decoration:none;">
+          🌐 打开 GitHub 注册页
+        </a>
+        <div style="font-size:12px;color:#999;margin-top:10px;">将在系统浏览器中打开</div>
+      </div>
+
+      <div class="card" id="registerAccountCard">
+        <div class="section-title">待注册账号（未注册列表第一条）</div>
+        <div id="registerAccountInfo"></div>
+      </div>
     </div>
-    <iframe id="registerFrame" src="https://github.com/signup" style="flex:1;width:100%;border:none;"></iframe>
   </div>
 
   <!-- 详情弹窗 -->
