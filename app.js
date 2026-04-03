@@ -573,7 +573,9 @@ function removeTag(tag) {
 }
 
 function copyText(text, label) {
-  navigator.clipboard.writeText(text).then(() => showToast(`已复制${label}`))
+  // 126邮箱账号只复制@前面的用户名部分
+  const copyVal = (label === '账号' && text.endsWith('@126.com')) ? text.split('@')[0] : text
+  navigator.clipboard.writeText(copyVal).then(() => showToast(`已复制${label}`))
 }
 
 // ==================== Toast ====================
