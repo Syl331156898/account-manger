@@ -87,8 +87,16 @@
     <div class="page-content">
       <div class="card">
         <div class="section-title">GitHub Gist 凭证</div>
-        <input type="text" id="syncToken" class="info-input" placeholder="输入 GitHub Token" style="margin-bottom:10px" />
-        <input type="text" id="syncGistId" class="info-input" placeholder="输入 Gist ID" style="margin-bottom:10px" />
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="font-size: 13px; color: #666; width: 60px;">Token</span>
+          <input type="text" id="syncToken" class="info-input" placeholder="输入 GitHub Token" />
+          <button class="inline-copy" onclick="copyText(document.getElementById('syncToken').value, 'Token')">复制</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="font-size: 13px; color: #666; width: 60px;">Gist ID</span>
+          <input type="text" id="syncGistId" class="info-input" placeholder="输入 Gist ID" />
+          <button class="inline-copy" onclick="copyText(document.getElementById('syncGistId').value, 'Gist ID')">复制</button>
+        </div>
         <button class="btn-outline" onclick="saveSyncConfig()" style="margin-top:10px">保存凭证</button>
       </div>
 
