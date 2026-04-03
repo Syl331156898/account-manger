@@ -375,6 +375,45 @@ function setStatus(id, status) {
 
 // ==================== 生成页 ====================
 let previewAccount = null
+let currentGenPlatform = 'github' // 'github' | '163'
+
+function switchGenSeg(platform) {
+  currentGenPlatform = platform
+  document.querySelectorAll('#gen-seg-github, #gen-seg-163').forEach(el => el.classList.remove('active'))
+  document.getElementById(`gen-seg-${platform}`).classList.add('active')
+  refreshPreview()
+}
+
+function generate163Username() {
+  // 网易邮箱：6-18位，字母开头，字母数字下划线
+  const letters = 'abcdefghijklmnopqrstuvwxyz'
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789_'
+  const length = Math.floor(Math.random() * 7) + 6 // 6~12位
+  let name = letters[Math.floor(Math.random() * letters.length)]
+  for (let i = 1; i < length; i++) {
+    name += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return name
+}
+
+function generateAccountFor163() {
+  const { first, last } = randomName()
+  const username163 = generate163Username()
+  return {
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
+    email: `${username163}@163.com`,
+    password: generatePassword(),
+    username: generateUsername(first, last),
+    firstName: first,
+    lastName: last,
+    platform: '163',
+    tags: [],
+    note: '',
+    isFavorite: false,
+    registered: false,
+    createdAt: new Date().toLocaleString('zh-CN')
+  }
+}
 
 function initGeneratorPage() {
   refreshPreview()
@@ -388,7 +427,7 @@ function changeBatch(delta) {
 }
 
 function refreshPreview() {
-  previewAccount = generateAccount()
+  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : generateAccount()
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
@@ -408,7 +447,7 @@ function refreshPreview() {
 function doSaveAccounts() {
   const accounts = getAccounts()
   for (let i = 0; i < batchCount; i++) {
-    accounts.unshift(generateAccount())
+    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : generateAccount())
   }
   saveAccountList(accounts)
   refreshPreview()
