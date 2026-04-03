@@ -535,31 +535,59 @@ renderList()
 initGeneratorPage()
 
 // ==================== 注册辅助页 ====================
+let registerCurrentId = null
+
 function initRegisterPage() {
   const accounts = getAccounts()
   const first = accounts.find(a => !a.registered && !a.sold)
+  registerCurrentId = first ? first.id : null
+  renderRegisterAccount()
+}
+
+function renderRegisterAccount() {
   const el = document.getElementById('registerAccountInfo')
-  if (!first) {
+  if (!registerCurrentId) {
     el.innerHTML = '<div class="empty" style="padding:20px 0">暂无未注册账号</div>'
     return
   }
+  const a = getAccounts().find(x => x.id === registerCurrentId)
+  if (!a) { el.innerHTML = '<div class="empty" style="padding:20px 0">暂无未注册账号</div>'; return }
   el.innerHTML = `
     <div class="info-row">
       <span class="info-label">邮箱</span>
-      <span class="info-value">${first.email}</span>
-      <button class="copy-btn" onclick="copyText('${first.email}', '邮箱')">复制</button>
+      <span class="info-value">${a.email}</span>
+      <button class="copy-btn" onclick="copyText('${a.email}', '邮箱')">复制</button>
     </div>
     <div class="info-row">
       <span class="info-label">密码</span>
-      <span class="info-value">${first.password}</span>
-      <button class="copy-btn" onclick="copyText('${first.password}', '密码')">复制</button>
+      <span class="info-value">${a.password}</span>
+      <button class="copy-btn" onclick="copyText('${a.password}', '密码')">复制</button>
     </div>
     <div class="info-row">
       <span class="info-label">用户名</span>
-      <span class="info-value">${first.username}</span>
-      <button class="copy-btn" onclick="copyText('${first.username}', '用户名')">复制</button>
+      <span class="info-value">${a.username}</span>
+      <button class="copy-btn" onclick="copyText('${a.username}', '用户名')">复制</button>
     </div>
   `
+}
+
+function switchToNextRegister() {
+  const accounts = getAccounts().filter(a => !a.registered && !a.sold)
+  if (!accounts.length) return
+  const idx = accounts.findIndex(a => a.id === registerCurrentId)
+  const next = accounts[(idx + 1) % accounts.length]
+  registerCurrentId = next.id
+  renderRegisterAccount()
+}
+
+function markCurrentRegistered() {
+  if (!registerCurrentId) return
+  setStatus(registerCurrentId, 'registered')
+  showToast('已标记为已注册')
+  // 自动切换到下一个
+  const accounts = getAccounts().filter(a => !a.registered && !a.sold)
+  registerCurrentId = accounts.length ? accounts[0].id : null
+  renderRegisterAccount()
 }
 
 
