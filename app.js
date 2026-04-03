@@ -296,7 +296,6 @@ function renderList() {
     let actionBtn = ''
     if (currentSeg === 'unregistered') {
       actionBtn = `
-        <button class="reg-btn" style="color: #007AFF;" onclick="event.stopPropagation(); window.open('https://github.com/signup', '_blank')">去注册</button>
         <button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">标记已注册</button>
       `
     } else if (currentSeg === 'registered') {

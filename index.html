@@ -31,10 +31,6 @@
       <span class="tab-icon">☁</span>
       <span>云同步</span>
     </div>
-    <div class="tab-item" data-tab="register" onclick="switchTab('register')">
-      <span class="tab-icon">🌐</span>
-      <span>去注册</span>
-    </div>
   </nav>
 
   <!-- 账号列表页 -->
@@ -116,37 +112,6 @@
           <input type="checkbox" id="autoSyncCheckbox" style="width:20px;height:20px;accent-color:#007AFF" onchange="saveAutoSync(this.checked)" checked />
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- 注册页 -->
-  <div id="page-register" class="page">
-    <div class="nav-bar"><span class="nav-title">去注册</span></div>
-    <div class="page-content">
-
-      <!-- 账号信息卡片，常驻顶部 -->
-      <div class="card" id="registerAccountCard">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div class="section-title" style="margin:0">待注册账号</div>
-          <button onclick="switchToNextRegister()" style="font-size:12px;color:#007AFF;background:none;border:none;cursor:pointer;">换下一个</button>
-        </div>
-        <div id="registerAccountInfo"></div>
-      </div>
-
-      <!-- 注册按钮 -->
-      <div class="card" style="text-align:center;">
-        <div style="font-size:13px;color:#666;margin-bottom:14px;line-height:1.6;">
-          复制好账号信息后，点击下方按钮打开注册页。<br/>注册完成后按返回键回到此页，点击"标记已注册"。
-        </div>
-        <button onclick="window.open('https://github.com/signup')"
-          style="width:100%;background:#24292f;color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;cursor:pointer;">
-          🌐 打开 GitHub 注册页
-        </button>
-      </div>
-
-      <!-- 标记按钮 -->
-      <button class="btn-primary" style="background:#34c759;" onclick="markCurrentRegistered()">✓ 标记当前账号已注册</button>
-
     </div>
   </div>
 
