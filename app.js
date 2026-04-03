@@ -254,11 +254,16 @@ function renderList() {
   const accounts = getAccounts()
 
   // 按状态分栏过滤
-  const segFiltered = accounts.filter(a => {
-    if (currentSeg === 'unregistered') return !a.registered && !a.sold
-    if (currentSeg === 'registered') return a.registered && !a.sold
-    if (currentSeg === 'sold') return a.sold === true
-  })
+  const unregistered = accounts.filter(a => !a.registered && !a.sold)
+  const registered = accounts.filter(a => a.registered && !a.sold)
+  const sold = accounts.filter(a => a.sold === true)
+
+  // 更新分栏数量
+  document.getElementById('seg-unregistered').textContent = `未注册 ${unregistered.length}`
+  document.getElementById('seg-registered').textContent = `已注册 ${registered.length}`
+  document.getElementById('seg-sold').textContent = `号已出 ${sold.length}`
+
+  const segFiltered = currentSeg === 'unregistered' ? unregistered : currentSeg === 'registered' ? registered : sold
 
   const allTags = [...new Set(segFiltered.flatMap(a => a.tags))]
   const tagFilter = document.getElementById('tagFilter')
@@ -326,7 +331,7 @@ function renderList() {
         </div>
         ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
         <div class="card-bottom">
-          <span class="date">${a.createdAt}</span>
+          <span class="date">${currentSeg === 'unregistered' ? a.createdAt : currentSeg === 'registered' ? (a.registeredAt || a.createdAt) : (a.soldAt || a.createdAt)}</span>
           <div style="display:flex;gap:10px;align-items:center">
             ${actionBtn}
             <button class="delete-btn" onclick="event.stopPropagation(); deleteAccount('${a.id}')">删除</button>
@@ -361,6 +366,9 @@ function setStatus(id, status) {
   if (!a) return
   a.registered = status === 'registered'
   a.sold = status === 'sold'
+  if (status === 'registered' && !a.registeredAt) a.registeredAt = new Date().toLocaleString('zh-CN')
+  if (status === 'sold') a.soldAt = new Date().toLocaleString('zh-CN')
+  if (status === 'unregistered') { a.registeredAt = ''; a.soldAt = '' }
   saveAccountList(accounts)
   renderList()
 }
@@ -445,6 +453,16 @@ function renderDetail() {
       <span class="info-label">创建时间</span>
       <span class="info-value" style="font-family:inherit;font-size:12px">${a.createdAt}</span>
     </div>
+    ${a.registered && a.registeredAt ? `
+    <div class="info-row">
+      <span class="info-label">注册时间</span>
+      <span class="info-value" style="font-family:inherit;font-size:12px">${a.registeredAt}</span>
+    </div>` : ''}
+    ${a.sold && a.soldAt ? `
+    <div class="info-row">
+      <span class="info-label">出号时间</span>
+      <span class="info-value" style="font-family:inherit;font-size:12px">${a.soldAt}</span>
+    </div>` : ''}
 
     <div class="detail-section">
       <div class="favorite-row">
