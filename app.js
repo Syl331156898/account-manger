@@ -401,7 +401,7 @@ function generateAccountFor163() {
   const username163 = generate163Username()
   return {
     id: Date.now().toString() + Math.random().toString(36).slice(2),
-    email: `${username163}@163.com`,
+    email: `${username163}@126.com`,
     password: generatePassword(),
     username: generateUsername(first, last),
     firstName: first,
