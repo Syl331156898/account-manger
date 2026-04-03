@@ -375,7 +375,7 @@ function setStatus(id, status) {
 
 // ==================== 生成页 ====================
 let previewAccount = null
-let currentGenPlatform = 'github' // 'github' | '163'
+let currentGenPlatform = '163'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
