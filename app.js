@@ -416,11 +416,17 @@ function generateProtonPrefix() {
 
 function generateAccountForProton() {
   const { first, last } = randomName()
+  const addNum = Math.random() > 0.6
+  const numStr = addNum ? String(Math.floor(Math.random() * 999) + 1) : ''
+  const numPos = Math.random() > 0.5 ? 'after' : 'before'
+  const username = addNum
+    ? (numPos === 'after' ? `${first} ${last}${numStr}` : `${numStr}${first} ${last}`)
+    : `${first} ${last}`
   return {
     id: Date.now().toString() + Math.random().toString(36).slice(2),
     email: `${generateProtonPrefix()}@proton.me`,
     password: generatePassword(),
-    username: generateUsername(first, last),
+    username,
     firstName: first,
     lastName: last,
     platform: 'proton',
