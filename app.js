@@ -379,7 +379,7 @@ let currentGenPlatform = '163'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
-  document.querySelectorAll('#gen-seg-github, #gen-seg-163').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#gen-seg-github, #gen-seg-163, #gen-seg-duck').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
 }
@@ -438,6 +438,24 @@ function generateAccountForProton() {
   }
 }
 
+function generateAccountForDuck(prefix) {
+  const { first, last } = randomName()
+  return {
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
+    email: `${prefix}@duck.com`,
+    password: generatePassword(),
+    username: generateUsername(first, last),
+    firstName: first,
+    lastName: last,
+    platform: 'duck',
+    tags: [],
+    note: '',
+    isFavorite: false,
+    registered: false,
+    createdAt: new Date().toLocaleString('zh-CN')
+  }
+}
+
 function generateAccountFor163() {
   const { first, last } = randomName()
   const username163 = generate163Username()
@@ -469,6 +487,30 @@ function changeBatch(delta) {
 }
 
 function refreshPreview() {
+  if (currentGenPlatform === 'duck') {
+    const prefix = (document.getElementById('duckPrefix') || {}).value || ''
+    previewAccount = generateAccountForDuck(prefix)
+    document.getElementById('previewContent').innerHTML = `
+      <div class="preview-row">
+        <span class="preview-label">邮箱前缀</span>
+        <input id="duckPrefix" class="info-input" placeholder="输入邮箱前缀" value="${prefix}"
+          style="flex:1;font-size:13px;" oninput="refreshDuckPreview(this.value)" />
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">邮箱</span>
+        <span class="preview-value" id="duckEmailPreview">${prefix ? prefix + '@duck.com' : '请输入前缀'}</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">密码</span>
+        <span class="preview-value">${previewAccount.password}</span>
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">用户名</span>
+        <span class="preview-value">${previewAccount.username}</span>
+      </div>
+    `
+    return
+  }
   previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : generateAccount()
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
@@ -486,8 +528,19 @@ function refreshPreview() {
   `
 }
 
+function refreshDuckPreview(prefix) {
+  const el = document.getElementById('duckEmailPreview')
+  if (el) el.textContent = prefix ? prefix + '@duck.com' : '请输入前缀'
+  if (previewAccount) previewAccount.email = prefix ? `${prefix}@duck.com` : ''
+}
+
 function doSaveSingle() {
   if (!previewAccount) return
+  if (currentGenPlatform === 'duck') {
+    const prefix = (document.getElementById('duckPrefix') || {}).value || ''
+    if (!prefix.trim()) { showToast('请先输入邮箱前缀'); return }
+    previewAccount.email = `${prefix.trim()}@duck.com`
+  }
   const accounts = getAccounts()
   accounts.unshift(previewAccount)
   saveAccountList(accounts)
@@ -496,6 +549,7 @@ function doSaveSingle() {
 }
 
 function doSaveAccounts() {
+  if (currentGenPlatform === 'duck') { doSaveSingle(); return }
   const accounts = getAccounts()
   for (let i = 0; i < batchCount; i++) {
     accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : generateAccount())
@@ -700,7 +754,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.3'
+let APP_VERSION = 'V1.0.4'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
