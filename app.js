@@ -397,22 +397,18 @@ function generate163Username() {
 }
 
 function generateProtonPrefix() {
-  const { first, last } = randomName()
-  const f = first.toLowerCase()
-  const l = last.toLowerCase()
-  const year = Math.floor(Math.random() * 35) + 1980 // 1980~2014
-  const num = Math.floor(Math.random() * 99) + 1
-  const sep = ['', '.', '_'][Math.floor(Math.random() * 3)]
-  const patterns = [
-    `${f}${sep}${l}`,
-    `${f}${sep}${l}${year}`,
-    `${f}${sep}${l}${num}`,
-    `${f}${year}`,
-    `${f}${sep}${l.slice(0,4)}${num}`,
-    `${f.slice(0,1)}${sep}${l}${year}`,
-    `${f.slice(0,1)}${sep}${l}${num}`,
-  ]
-  return patterns[Math.floor(Math.random() * patterns.length)]
+  const letters = 'abcdefghijklmnopqrstuvwxyz'
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789_'
+  const length = Math.floor(Math.random() * 10) + 8 // 8~17位
+  let name = letters[Math.floor(Math.random() * letters.length)]
+  for (let i = 1; i < length; i++) {
+    // 避免连续下划线
+    const last = name[name.length - 1]
+    const pool = last === '_' ? chars.replace(/_/g, '') : chars
+    name += pool[Math.floor(Math.random() * pool.length)]
+  }
+  // 不能以下划线结尾
+  return name.replace(/_+$/, letters[Math.floor(Math.random() * letters.length)])
 }
 
 function generateAccountForProton() {
