@@ -375,7 +375,7 @@ function setStatus(id, status) {
 
 // ==================== 生成页 ====================
 let previewAccount = null
-let currentGenPlatform = '163'
+let currentGenPlatform = 'duck'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
@@ -492,13 +492,9 @@ function refreshPreview() {
     previewAccount = generateAccountForDuck(prefix)
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
-        <span class="preview-label">邮箱前缀</span>
-        <input id="duckPrefix" class="info-input" placeholder="输入邮箱前缀" value="${prefix}"
-          style="flex:1;font-size:13px;" oninput="refreshDuckPreview(this.value)" />
-      </div>
-      <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <span class="preview-value" id="duckEmailPreview">${prefix ? prefix + '@duck.com' : '请输入前缀'}</span>
+        <input id="duckPrefix" class="info-input" placeholder="输入前缀@duck.com" value="${prefix}"
+          style="flex:1;font-size:13px;" oninput="updateDuckEmail(this.value)" />
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
@@ -528,9 +524,7 @@ function refreshPreview() {
   `
 }
 
-function refreshDuckPreview(prefix) {
-  const el = document.getElementById('duckEmailPreview')
-  if (el) el.textContent = prefix ? prefix + '@duck.com' : '请输入前缀'
+function updateDuckEmail(prefix) {
   if (previewAccount) previewAccount.email = prefix ? `${prefix}@duck.com` : ''
 }
 
@@ -754,7 +748,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.4'
+let APP_VERSION = 'V1.0.5'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
