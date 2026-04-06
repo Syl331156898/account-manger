@@ -700,7 +700,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.1'
+let APP_VERSION = 'V1.0.2'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
@@ -708,21 +708,12 @@ fetch('./version.json').then(r => r.json()).then(d => {
 }).catch(() => {})
 
 function forceRefresh() {
+  const el = document.getElementById('toast')
+  el.textContent = `更新完成，当前版本 ${APP_VERSION}`
+  el.classList.remove('hidden')
   if ('serviceWorker' in navigator) {
-    caches.keys().then(function(names) {
-      for (let name of names) caches.delete(name);
-    });
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) registration.unregister();
-      const el = document.getElementById('toast')
-      el.textContent = `更新完成，当前版本 ${APP_VERSION}`
-      el.classList.remove('hidden')
-      setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
-    });
-  } else {
-    const el = document.getElementById('toast')
-    el.textContent = `当前版本 ${APP_VERSION}`
-    el.classList.remove('hidden')
-    setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
+    caches.keys().then(names => names.forEach(n => caches.delete(n)))
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()))
   }
+  setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
 }
