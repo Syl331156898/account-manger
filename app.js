@@ -493,16 +493,22 @@ function refreshPreview() {
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="info-input" placeholder="输入前缀@duck.com" value="${prefix}"
-          style="flex:1;font-size:13px;" oninput="updateDuckEmail(this.value)" />
+        <input id="duckPrefix" class="preview-value" placeholder="输入前缀" value="${prefix}"
+          style="border:none;outline:none;background:transparent;text-align:right;"
+          oninput="updateDuckEmail(this.value)" />
+        <span style="font-size:13px;color:#222;font-family:monospace;">@duck.com</span>
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
-        <span class="preview-value">${previewAccount.password}</span>
+        <input id="duckPwd" class="preview-value" value="${previewAccount.password}"
+          style="border:none;outline:none;background:transparent;text-align:right;"
+          oninput="previewAccount.password=this.value" />
       </div>
       <div class="preview-row">
         <span class="preview-label">用户名</span>
-        <span class="preview-value">${previewAccount.username}</span>
+        <input id="duckUsername" class="preview-value" value="${previewAccount.username}"
+          style="border:none;outline:none;background:transparent;text-align:right;"
+          oninput="previewAccount.username=this.value" />
       </div>
     `
     return
@@ -534,9 +540,11 @@ function doSaveSingle() {
     const prefix = (document.getElementById('duckPrefix') || {}).value || ''
     if (!prefix.trim()) { showToast('请先输入邮箱前缀'); return }
     previewAccount.email = `${prefix.trim()}@duck.com`
+    previewAccount.password = document.getElementById('duckPwd').value || previewAccount.password
+    previewAccount.username = document.getElementById('duckUsername').value || previewAccount.username
   }
   const accounts = getAccounts()
-  accounts.unshift(previewAccount)
+  accounts.unshift({...previewAccount})
   saveAccountList(accounts)
   showToast('已保存当前账号')
   refreshPreview()
@@ -748,7 +756,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.5'
+let APP_VERSION = 'V1.0.6'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
