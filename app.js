@@ -700,7 +700,12 @@ function markCurrentRegistered() {
 }
 
 
-const APP_VERSION = 'V1.0.0'
+let APP_VERSION = 'V1.0.1'
+fetch('./version.json').then(r => r.json()).then(d => {
+  APP_VERSION = 'V' + d.version
+  const el = document.getElementById('appVersion')
+  if (el) el.textContent = '当前版本 ' + APP_VERSION
+}).catch(() => {})
 
 function forceRefresh() {
   if ('serviceWorker' in navigator) {
