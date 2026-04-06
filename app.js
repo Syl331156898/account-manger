@@ -541,6 +541,17 @@ function doSaveSingle() {
     previewAccount.email = email.trim()
     previewAccount.password = document.getElementById('duckPwd').value || previewAccount.password
     previewAccount.username = document.getElementById('duckUsername').value || previewAccount.username
+    const accounts = getAccounts()
+    accounts.unshift({...previewAccount})
+    saveAccountList(accounts)
+    showToast('已保存当前账号')
+    // 清空邮箱，刷新密码和用户名
+    const newAcc = generateAccountForDuck('')
+    previewAccount = newAcc
+    document.getElementById('duckPrefix').value = ''
+    document.getElementById('duckPwd').value = newAcc.password
+    document.getElementById('duckUsername').value = newAcc.username
+    return
   }
   const accounts = getAccounts()
   accounts.unshift({...previewAccount})
