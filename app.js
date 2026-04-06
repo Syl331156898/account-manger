@@ -398,17 +398,20 @@ function generate163Username() {
 
 function generateProtonPrefix() {
   const letters = 'abcdefghijklmnopqrstuvwxyz'
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789_'
-  const length = Math.floor(Math.random() * 10) + 8 // 8~17位
-  let name = letters[Math.floor(Math.random() * letters.length)]
-  for (let i = 1; i < length; i++) {
-    // 避免连续下划线
-    const last = name[name.length - 1]
-    const pool = last === '_' ? chars.replace(/_/g, '') : chars
-    name += pool[Math.floor(Math.random() * pool.length)]
-  }
-  // 不能以下划线结尾
-  return name.replace(/_+$/, letters[Math.floor(Math.random() * letters.length)])
+  const words = ['sky','fox','wolf','bear','hawk','storm','river','stone','fire','moon',
+    'star','cloud','wind','rain','snow','peak','lake','hill','vale','grove',
+    'ash','elm','oak','pine','reed','sage','wren','dove','swift','crane']
+  const w1 = words[Math.floor(Math.random() * words.length)]
+  const w2 = words[Math.floor(Math.random() * words.length)]
+  const num = Math.floor(Math.random() * 9000) + 100
+  const patterns = [
+    `${w1}${w2}`,
+    `${w1}${w2}${num}`,
+    `${w1}${num}`,
+    `${w2}${w1}`,
+    `${w1}${w2.slice(0,3)}${num}`,
+  ]
+  return patterns[Math.floor(Math.random() * patterns.length)]
 }
 
 function generateAccountForProton() {
@@ -475,6 +478,15 @@ function refreshPreview() {
       <span class="preview-value">${previewAccount.username}</span>
     </div>
   `
+}
+
+function doSaveSingle() {
+  if (!previewAccount) return
+  const accounts = getAccounts()
+  accounts.unshift(previewAccount)
+  saveAccountList(accounts)
+  showToast('已保存当前账号')
+  refreshPreview()
 }
 
 function doSaveAccounts() {
@@ -682,19 +694,24 @@ function markCurrentRegistered() {
 }
 
 
+const APP_VERSION = 'V1.0.0'
+
 function forceRefresh() {
-  showToast('正在获取最新代码并刷新...');
   if ('serviceWorker' in navigator) {
     caches.keys().then(function(names) {
       for (let name of names) caches.delete(name);
     });
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      for(let registration of registrations) {
-        registration.unregister();
-      }
-      setTimeout(() => window.location.reload(true), 500);
+      for(let registration of registrations) registration.unregister();
+      const el = document.getElementById('toast')
+      el.textContent = `更新完成，当前版本 ${APP_VERSION}`
+      el.classList.remove('hidden')
+      setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
     });
   } else {
-    setTimeout(() => window.location.reload(true), 500);
+    const el = document.getElementById('toast')
+    el.textContent = `当前版本 ${APP_VERSION}`
+    el.classList.remove('hidden')
+    setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
   }
 }
