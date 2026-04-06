@@ -375,11 +375,11 @@ function setStatus(id, status) {
 
 // ==================== 生成页 ====================
 let previewAccount = null
-let currentGenPlatform = 'proton'
+let currentGenPlatform = '163'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
-  document.querySelectorAll('#gen-seg-github, #gen-seg-163, #gen-seg-proton').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#gen-seg-github, #gen-seg-163').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
 }
@@ -469,7 +469,7 @@ function changeBatch(delta) {
 }
 
 function refreshPreview() {
-  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : currentGenPlatform === 'proton' ? generateAccountForProton() : generateAccount()
+  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : generateAccount()
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
@@ -498,7 +498,7 @@ function doSaveSingle() {
 function doSaveAccounts() {
   const accounts = getAccounts()
   for (let i = 0; i < batchCount; i++) {
-    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : currentGenPlatform === 'proton' ? generateAccountForProton() : generateAccount())
+    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : generateAccount())
   }
   saveAccountList(accounts)
   refreshPreview()
@@ -700,7 +700,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.2'
+let APP_VERSION = 'V1.0.3'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
