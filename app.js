@@ -494,7 +494,7 @@ function refreshPreview() {
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
         <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
-          style="border:none;outline:none;background:transparent;text-align:right;"
+          style="border:none;outline:none;background:transparent;text-align:left;flex:1;width:0;"
           oninput="updateDuckEmail(this.value)" />
       </div>
       <div class="preview-row">
