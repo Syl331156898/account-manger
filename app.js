@@ -493,10 +493,9 @@ function refreshPreview() {
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="preview-value" placeholder="输入前缀" value="${prefix}"
+        <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;"
           oninput="updateDuckEmail(this.value)" />
-        <span style="font-size:13px;color:#222;font-family:monospace;">@duck.com</span>
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
@@ -530,16 +529,16 @@ function refreshPreview() {
   `
 }
 
-function updateDuckEmail(prefix) {
-  if (previewAccount) previewAccount.email = prefix ? `${prefix}@duck.com` : ''
+function updateDuckEmail(val) {
+  if (previewAccount) previewAccount.email = val
 }
 
 function doSaveSingle() {
   if (!previewAccount) return
   if (currentGenPlatform === 'duck') {
-    const prefix = (document.getElementById('duckPrefix') || {}).value || ''
-    if (!prefix.trim()) { showToast('请先输入邮箱前缀'); return }
-    previewAccount.email = `${prefix.trim()}@duck.com`
+    const email = (document.getElementById('duckPrefix') || {}).value || ''
+    if (!email.trim()) { showToast('请先输入邮箱'); return }
+    previewAccount.email = email.trim()
     previewAccount.password = document.getElementById('duckPwd').value || previewAccount.password
     previewAccount.username = document.getElementById('duckUsername').value || previewAccount.username
   }
