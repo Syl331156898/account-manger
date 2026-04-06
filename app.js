@@ -375,11 +375,11 @@ function setStatus(id, status) {
 
 // ==================== 生成页 ====================
 let previewAccount = null
-let currentGenPlatform = '163'
+let currentGenPlatform = 'proton'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
-  document.querySelectorAll('#gen-seg-github, #gen-seg-163').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#gen-seg-github, #gen-seg-163, #gen-seg-proton').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
 }
@@ -394,6 +394,43 @@ function generate163Username() {
     name += chars[Math.floor(Math.random() * chars.length)]
   }
   return name
+}
+
+function generateProtonPrefix() {
+  const { first, last } = randomName()
+  const f = first.toLowerCase()
+  const l = last.toLowerCase()
+  const year = Math.floor(Math.random() * 35) + 1980 // 1980~2014
+  const num = Math.floor(Math.random() * 99) + 1
+  const sep = ['', '.', '_'][Math.floor(Math.random() * 3)]
+  const patterns = [
+    `${f}${sep}${l}`,
+    `${f}${sep}${l}${year}`,
+    `${f}${sep}${l}${num}`,
+    `${f}${year}`,
+    `${f}${sep}${l.slice(0,4)}${num}`,
+    `${f.slice(0,1)}${sep}${l}${year}`,
+    `${f.slice(0,1)}${sep}${l}${num}`,
+  ]
+  return patterns[Math.floor(Math.random() * patterns.length)]
+}
+
+function generateAccountForProton() {
+  const { first, last } = randomName()
+  return {
+    id: Date.now().toString() + Math.random().toString(36).slice(2),
+    email: `${generateProtonPrefix()}@proton.me`,
+    password: generatePassword(),
+    username: generateUsername(first, last),
+    firstName: first,
+    lastName: last,
+    platform: 'proton',
+    tags: [],
+    note: '',
+    isFavorite: false,
+    registered: false,
+    createdAt: new Date().toLocaleString('zh-CN')
+  }
 }
 
 function generateAccountFor163() {
@@ -427,7 +464,7 @@ function changeBatch(delta) {
 }
 
 function refreshPreview() {
-  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : generateAccount()
+  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : currentGenPlatform === 'proton' ? generateAccountForProton() : generateAccount()
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
@@ -447,7 +484,7 @@ function refreshPreview() {
 function doSaveAccounts() {
   const accounts = getAccounts()
   for (let i = 0; i < batchCount; i++) {
-    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : generateAccount())
+    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : currentGenPlatform === 'proton' ? generateAccountForProton() : generateAccount())
   }
   saveAccountList(accounts)
   refreshPreview()
