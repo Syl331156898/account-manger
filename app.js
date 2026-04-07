@@ -408,12 +408,20 @@ function setStatus(id, status) {
     kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
     trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
   }
-  const s = a.platforms[currentPlatform]
-  s.registered = status === 'registered'
-  s.sold = status === 'sold'
-  if (status === 'registered' && !s.registeredAt) s.registeredAt = new Date().toLocaleString('zh-CN')
-  if (status === 'sold') s.soldAt = new Date().toLocaleString('zh-CN')
-  if (status === 'unregistered') { s.registeredAt = ''; s.soldAt = '' }
+
+  const platforms = status === 'registered' || status === 'unregistered'
+    ? ['kiro', 'trae']       // 注册/取消注册 两个平台同步
+    : [currentPlatform]      // 号已出/移回已注册 只影响当前平台
+
+  platforms.forEach(p => {
+    const s = a.platforms[p]
+    s.registered = status === 'registered'
+    s.sold = status === 'sold'
+    if (status === 'registered' && !s.registeredAt) s.registeredAt = new Date().toLocaleString('zh-CN')
+    if (status === 'sold') s.soldAt = new Date().toLocaleString('zh-CN')
+    if (status === 'unregistered') { s.registeredAt = ''; s.soldAt = '' }
+  })
+
   saveAccountList(accounts)
   renderList()
 }
@@ -766,8 +774,13 @@ function showToast(msg) {
   const el = document.getElementById('toast')
   el.textContent = msg
   el.classList.remove('hidden')
+  // Use a slight delay to allow display:block to apply before adding opacity
+  setTimeout(() => el.classList.add('show'), 10)
   clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => el.classList.add('hidden'), 2000)
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show')
+    setTimeout(() => el.classList.add('hidden'), 300) // Wait for transition
+  }, 2000)
 }
 
 // ==================== 初始化 ====================
