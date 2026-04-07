@@ -252,7 +252,7 @@ function switchPlatform(platform) {
 
 function switchSeg(seg) {
   currentSeg = seg
-  document.querySelectorAll('.seg-item').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#seg-unregistered, #seg-registered, #seg-sold').forEach(el => el.classList.remove('active'))
   document.getElementById(`seg-${seg}`).classList.add('active')
   renderList()
 }
