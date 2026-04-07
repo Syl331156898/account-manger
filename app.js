@@ -500,7 +500,6 @@ function refreshPreview() {
         <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;width:0;"
           oninput="updateDuckEmail(this.value)" />
-        <button class="inline-copy" onclick="pasteDuckEmail()" style="margin-left:6px;flex-shrink:0;">粘贴</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
@@ -538,16 +537,6 @@ function updateDuckEmail(val) {
   if (previewAccount) previewAccount.email = val
 }
 
-function pasteDuckEmail() {
-  navigator.clipboard.readText().then(text => {
-    const input = document.getElementById('duckPrefix')
-    if (input) {
-      input.value = text.trim()
-      updateDuckEmail(text.trim())
-    }
-  }).catch(() => showToast('无法读取剪贴板'))
-}
-
 function doSaveSingle() {
   if (!previewAccount) return
   if (currentGenPlatform === 'duck') {
@@ -556,11 +545,14 @@ function doSaveSingle() {
     previewAccount.email = email.trim()
     previewAccount.password = document.getElementById('duckPwd').value || previewAccount.password
     previewAccount.username = document.getElementById('duckUsername').value || previewAccount.username
-    const accounts = getAccounts()
-    accounts.unshift({...previewAccount})
-    saveAccountList(accounts)
-    showToast('已保存当前账号')
-    // 清空邮箱，刷新密码和用户名
+  }
+  const accounts = getAccounts()
+  const dup = accounts.find(a => !a.registered && !a.sold && a.email === previewAccount.email)
+  if (dup) { showToast('⚠️ 未注册列表已有相同邮箱'); return }
+  accounts.unshift({...previewAccount})
+  saveAccountList(accounts)
+  showToast('已保存当前账号')
+  if (currentGenPlatform === 'duck') {
     const newAcc = generateAccountForDuck('')
     previewAccount = newAcc
     document.getElementById('duckPrefix').value = ''
@@ -568,22 +560,24 @@ function doSaveSingle() {
     document.getElementById('duckUsername').value = newAcc.username
     return
   }
-  const accounts = getAccounts()
-  accounts.unshift({...previewAccount})
-  saveAccountList(accounts)
-  showToast('已保存当前账号')
   refreshPreview()
 }
 
 function doSaveAccounts() {
   if (currentGenPlatform === 'duck') { doSaveSingle(); return }
   const accounts = getAccounts()
+  const existing = new Set(accounts.filter(a => !a.registered && !a.sold).map(a => a.email))
+  let saved = 0, skipped = 0
   for (let i = 0; i < batchCount; i++) {
-    accounts.unshift(generateAccount())
+    const acc = generateAccount()
+    if (existing.has(acc.email)) { skipped++; continue }
+    existing.add(acc.email)
+    accounts.unshift(acc)
+    saved++
   }
   saveAccountList(accounts)
   refreshPreview()
-  showToast(`已保存 ${batchCount} 个账号`)
+  showToast(skipped ? `已保存 ${saved} 个，跳过 ${skipped} 个重复` : `已保存 ${saved} 个账号`)
 }
 
 // ==================== 详情弹窗 ====================
