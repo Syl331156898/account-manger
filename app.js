@@ -770,7 +770,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.10'
+let APP_VERSION = 'V1.0.11'
 fetch('./version.json').then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
