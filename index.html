@@ -46,6 +46,11 @@
       <span class="nav-title">账号列表</span>
       <button onclick="forceRefresh()" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); background:none; border:none; color:#007AFF; font-size:14px; cursor:pointer;">更新代码</button>
     </div>
+    <!-- 平台切换 -->
+    <div style="display:flex;background:#fff;border-bottom:1px solid #eee;">
+      <div id="plat-kiro" class="seg-item active" style="font-size:15px;font-weight:600;" onclick="switchPlatform('kiro')">Kiro</div>
+      <div id="plat-trae" class="seg-item" style="font-size:15px;font-weight:600;" onclick="switchPlatform('trae')">Trae</div>
+    </div>
     <!-- 注册状态分栏 -->
     <div class="seg-control">
       <div class="seg-item active" id="seg-unregistered" onclick="switchSeg('unregistered')">未注册</div>

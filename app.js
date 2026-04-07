@@ -9,6 +9,22 @@ function getSyncConfig() {
   }
 }
 
+// ==================== 数据迁移：旧格式兼容 ====================
+function migrateAccounts() {
+  const accounts = JSON.parse(localStorage.getItem('accounts') || '[]')
+  let changed = false
+  accounts.forEach(a => {
+    if (!a.platforms) {
+      a.platforms = {
+        kiro: { registered: a.registered || false, sold: a.sold || false, registeredAt: a.registeredAt || '', soldAt: a.soldAt || '' },
+        trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+      }
+      changed = true
+    }
+  })
+  if (changed) localStorage.setItem('accounts', JSON.stringify(accounts))
+}
+
 function getAccounts() {
   return JSON.parse(localStorage.getItem('accounts') || '[]')
 }
@@ -212,6 +228,10 @@ function generateAccount() {
     note: '',
     isFavorite: false,
     registered: false,
+    platforms: {
+      kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+    },
     createdAt: new Date().toLocaleString('zh-CN')
   }
 }
@@ -220,7 +240,15 @@ function generateAccount() {
 let selectedTag = ''
 let batchCount = 1
 let currentDetailId = null
-let currentSeg = 'unregistered' // 'unregistered' | 'registered'
+let currentSeg = 'unregistered'
+let currentPlatform = 'kiro'
+
+function switchPlatform(platform) {
+  currentPlatform = platform
+  document.querySelectorAll('#plat-kiro, #plat-trae').forEach(el => el.classList.remove('active'))
+  document.getElementById(`plat-${platform}`).classList.add('active')
+  renderList()
+}
 
 function switchSeg(seg) {
   currentSeg = seg
@@ -252,13 +280,21 @@ function initSyncPage() {
 // ==================== 列表页 ====================
 function renderList() {
   const accounts = getAccounts()
+  const p = currentPlatform
 
-  // 按状态分栏过滤
-  const unregistered = accounts.filter(a => !a.registered && !a.sold)
-  const registered = accounts.filter(a => a.registered && !a.sold)
-  const sold = accounts.filter(a => a.sold === true)
+  const unregistered = accounts.filter(a => {
+    const s = a.platforms?.[p]
+    return s && !s.registered && !s.sold
+  })
+  const registered = accounts.filter(a => {
+    const s = a.platforms?.[p]
+    return s && s.registered && !s.sold
+  })
+  const sold = accounts.filter(a => {
+    const s = a.platforms?.[p]
+    return s && s.sold
+  })
 
-  // 更新分栏数量
   document.getElementById('seg-unregistered').textContent = `未注册 ${unregistered.length}`
   document.getElementById('seg-registered').textContent = `已注册 ${registered.length}`
   document.getElementById('seg-sold').textContent = `号已出 ${sold.length}`
@@ -333,8 +369,8 @@ function renderList() {
         <div class="card-bottom">
           <span class="date">${
             currentSeg === 'unregistered' ? `生成日期 ${a.createdAt}` :
-            currentSeg === 'registered' ? `注册日期 ${a.registeredAt || a.createdAt}` :
-            `出售日期 ${a.soldAt || a.createdAt}`
+            currentSeg === 'registered' ? `注册日期 ${a.platforms?.[currentPlatform]?.registeredAt || a.createdAt}` :
+            `出售日期 ${a.platforms?.[currentPlatform]?.soldAt || a.createdAt}`
           }</span>
           <div style="display:flex;gap:10px;align-items:center">
             ${actionBtn}
@@ -368,11 +404,16 @@ function setStatus(id, status) {
   const accounts = getAccounts()
   const a = accounts.find(x => x.id === id)
   if (!a) return
-  a.registered = status === 'registered'
-  a.sold = status === 'sold'
-  if (status === 'registered' && !a.registeredAt) a.registeredAt = new Date().toLocaleString('zh-CN')
-  if (status === 'sold') a.soldAt = new Date().toLocaleString('zh-CN')
-  if (status === 'unregistered') { a.registeredAt = ''; a.soldAt = '' }
+  if (!a.platforms) a.platforms = {
+    kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+    trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+  }
+  const s = a.platforms[currentPlatform]
+  s.registered = status === 'registered'
+  s.sold = status === 'sold'
+  if (status === 'registered' && !s.registeredAt) s.registeredAt = new Date().toLocaleString('zh-CN')
+  if (status === 'sold') s.soldAt = new Date().toLocaleString('zh-CN')
+  if (status === 'unregistered') { s.registeredAt = ''; s.soldAt = '' }
   saveAccountList(accounts)
   renderList()
 }
@@ -456,6 +497,10 @@ function generateAccountForDuck(prefix) {
     note: '',
     isFavorite: false,
     registered: false,
+    platforms: {
+      kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+    },
     createdAt: new Date().toLocaleString('zh-CN')
   }
 }
@@ -618,15 +663,15 @@ function renderDetail() {
       <span class="info-label">创建时间</span>
       <span class="info-value" style="font-family:inherit;font-size:12px">${a.createdAt}</span>
     </div>
-    ${a.registered && a.registeredAt ? `
+    ${a.platforms?.[currentPlatform]?.registered && a.platforms?.[currentPlatform]?.registeredAt ? `
     <div class="info-row">
       <span class="info-label">注册时间</span>
-      <span class="info-value" style="font-family:inherit;font-size:12px">${a.registeredAt}</span>
+      <span class="info-value" style="font-family:inherit;font-size:12px">${a.platforms[currentPlatform].registeredAt}</span>
     </div>` : ''}
-    ${a.sold && a.soldAt ? `
+    ${a.platforms?.[currentPlatform]?.sold && a.platforms?.[currentPlatform]?.soldAt ? `
     <div class="info-row">
       <span class="info-label">出号时间</span>
-      <span class="info-value" style="font-family:inherit;font-size:12px">${a.soldAt}</span>
+      <span class="info-value" style="font-family:inherit;font-size:12px">${a.platforms[currentPlatform].soldAt}</span>
     </div>` : ''}
 
     <div class="detail-section">
@@ -726,6 +771,7 @@ function showToast(msg) {
 }
 
 // ==================== 初始化 ====================
+migrateAccounts()
 renderList()
 initGeneratorPage()
 
