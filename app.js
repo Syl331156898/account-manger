@@ -652,6 +652,8 @@ function renderDetail() {
         `).join('')}
       </div>
       <div class="add-tag-row">
+        <button onclick="addPresetTag('Kiro')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Kiro</button>
+        <button onclick="addPresetTag('Trae')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Trae</button>
         <input type="text" id="newTagInput" placeholder="输入新标签" maxlength="10" onkeydown="if(event.key==='Enter') addTag()" />
         <button onclick="addTag()">添加</button>
       </div>
@@ -675,6 +677,15 @@ function saveNote() {
   const accounts = getAccounts()
   const a = accounts.find(x => x.id === currentDetailId)
   if (a) { a.note = document.getElementById('noteInput').value; saveAccountList(accounts) }
+}
+
+function addPresetTag(tag) {
+  const accounts = getAccounts()
+  const a = accounts.find(x => x.id === currentDetailId)
+  if (!a || a.tags.includes(tag)) { showToast(`已有标签 ${tag}`); return }
+  a.tags.push(tag)
+  saveAccountList(accounts)
+  renderDetail()
 }
 
 function addTag() {
