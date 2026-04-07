@@ -729,6 +729,15 @@ function showToast(msg) {
 renderList()
 initGeneratorPage()
 
+// 启动屏淡出
+window.addEventListener('load', () => {
+  const splash = document.getElementById('splash')
+  if (splash) {
+    splash.style.opacity = '0'
+    setTimeout(() => splash.style.display = 'none', 300)
+  }
+})
+
 // ==================== 注册辅助页 ====================
 let registerCurrentId = null
 
