@@ -500,6 +500,7 @@ function refreshPreview() {
         <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;width:0;"
           oninput="updateDuckEmail(this.value)" />
+        <button class="inline-copy" onclick="pasteDuckEmail()" style="margin-left:6px;flex-shrink:0;">粘贴</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
@@ -535,6 +536,16 @@ function refreshPreview() {
 
 function updateDuckEmail(val) {
   if (previewAccount) previewAccount.email = val
+}
+
+function pasteDuckEmail() {
+  navigator.clipboard.readText().then(text => {
+    const input = document.getElementById('duckPrefix')
+    if (input) {
+      input.value = text.trim()
+      updateDuckEmail(text.trim())
+    }
+  }).catch(() => showToast('无法读取剪贴板'))
 }
 
 function doSaveSingle() {
