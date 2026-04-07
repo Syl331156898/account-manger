@@ -331,7 +331,11 @@ function renderList() {
         </div>
         ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
         <div class="card-bottom">
-          <span class="date">${currentSeg === 'unregistered' ? a.createdAt : currentSeg === 'registered' ? (a.registeredAt || a.createdAt) : (a.soldAt || a.createdAt)}</span>
+          <span class="date">${
+            currentSeg === 'unregistered' ? `生成日期 ${a.createdAt}` :
+            currentSeg === 'registered' ? `注册日期 ${a.registeredAt || a.createdAt}` :
+            `出售日期 ${a.soldAt || a.createdAt}`
+          }</span>
           <div style="display:flex;gap:10px;align-items:center">
             ${actionBtn}
             <button class="delete-btn" onclick="event.stopPropagation(); deleteAccount('${a.id}')">删除</button>
@@ -379,7 +383,7 @@ let currentGenPlatform = 'duck'
 
 function switchGenSeg(platform) {
   currentGenPlatform = platform
-  document.querySelectorAll('#gen-seg-github, #gen-seg-163, #gen-seg-duck').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#gen-seg-github, #gen-seg-duck').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
 }
@@ -512,7 +516,7 @@ function refreshPreview() {
     `
     return
   }
-  previewAccount = currentGenPlatform === '163' ? generateAccountFor163() : generateAccount()
+  previewAccount = currentGenPlatform === 'duck' ? (() => { const p = generateAccountForDuck(''); return p })() : generateAccount()
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
@@ -564,7 +568,7 @@ function doSaveAccounts() {
   if (currentGenPlatform === 'duck') { doSaveSingle(); return }
   const accounts = getAccounts()
   for (let i = 0; i < batchCount; i++) {
-    accounts.unshift(currentGenPlatform === '163' ? generateAccountFor163() : generateAccount())
+    accounts.unshift(generateAccount())
   }
   saveAccountList(accounts)
   refreshPreview()
