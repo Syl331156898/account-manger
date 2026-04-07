@@ -116,12 +116,6 @@ function saveSyncConfig() {
   showToast('✅ 凭证保存成功')
 }
 
-function saveDdgToken() {
-  const token = document.getElementById('ddgToken').value.trim()
-  localStorage.setItem('ddg_token', token)
-  showToast('✅ Duck Token 保存成功')
-}
-
 function saveAutoSync(checked) {
   localStorage.setItem('auto_sync', checked ? 'true' : 'false')
 }
@@ -253,8 +247,6 @@ function initSyncPage() {
   document.getElementById('syncToken').value = config.token
   document.getElementById('syncGistId').value = config.gistId
   document.getElementById('autoSyncCheckbox').checked = config.autoSync
-  const ddgToken = localStorage.getItem('ddg_token') || ''
-  document.getElementById('ddgToken').value = ddgToken
 }
 
 // ==================== 列表页 ====================
@@ -500,13 +492,12 @@ function changeBatch(delta) {
 
 function refreshPreview() {
   if (currentGenPlatform === 'duck') {
-    const ddgToken = localStorage.getItem('ddg_token') || ''
     const prefix = (document.getElementById('duckPrefix') || {}).value || ''
     previewAccount = generateAccountForDuck(prefix)
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="preview-value" placeholder="${ddgToken ? '自动生成中...' : '输入完整邮箱'}" value="${prefix}"
+        <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;width:0;"
           oninput="updateDuckEmail(this.value)" />
       </div>
@@ -523,7 +514,6 @@ function refreshPreview() {
           oninput="previewAccount.username=this.value" />
       </div>
     `
-    if (ddgToken) fetchDuckAddress(ddgToken)
     return
   }
   previewAccount = generateAccount()
@@ -545,25 +535,6 @@ function refreshPreview() {
 
 function updateDuckEmail(val) {
   if (previewAccount) previewAccount.email = val
-}
-
-async function fetchDuckAddress(token) {
-  try {
-    const res = await fetch('https://quack.duckduckgo.com/api/email/addresses', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-    })
-    if (res.ok) {
-      const data = await res.json()
-      const email = `${data.address}@duck.com`
-      const input = document.getElementById('duckPrefix')
-      if (input) { input.value = email; updateDuckEmail(email) }
-    } else {
-      showToast('❌ DDG Token 无效或已过期')
-    }
-  } catch (e) {
-    showToast('❌ 获取 Duck 地址失败')
-  }
 }
 
 function doSaveSingle() {
