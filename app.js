@@ -860,9 +860,35 @@ function showToast(msg) {
 // ==================== 初始化 ====================
 migrateAccounts()
 
+// 启动时静默从云端拉取最新数据
+async function autoSyncOnStart() {
+  const config = getSyncConfig()
+  if (!config.token || !config.gistId) return
+  try {
+    const res = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${config.token}`
+      }
+    })
+    if (!res.ok) return
+    const gist = await res.json()
+    const file = gist.files['accounts_data.json']
+    if (!file || !file.content) return
+    const data = JSON.parse(file.content)
+    if (data.accounts) localStorage.setItem('accounts', JSON.stringify(data.accounts))
+    if (data.allTags) localStorage.setItem('allTags', JSON.stringify(data.allTags))
+    renderList()
+  } catch (e) {}
+}
+
 // 恢复上次所在 tab（更新刷新后保持位置）
 const _savedTab = sessionStorage.getItem('activeTab') || 'list'
 switchTab(_savedTab)
+
+// 启动后静默拉云端
+autoSyncOnStart()
 
 // 启动屏淡出
 window.addEventListener('load', () => {
