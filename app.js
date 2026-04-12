@@ -231,7 +231,24 @@ function generateUsername() {
   const adj = () => GH_ADJECTIVES[Math.floor(Math.random() * GH_ADJECTIVES.length)]
   const noun = () => GH_NOUNS[Math.floor(Math.random() * GH_NOUNS.length)]
   const num = () => Math.floor(Math.random() * 900) + 10
-  // 格式列表：必须字母开头，中间有 -，以数字或字母结尾
+  // 生成字母数字混合短串，如 4fg / er5 / x2k
+  const alphanum = () => {
+    const lc = 'abcdefghijklmnopqrstuvwxyz'
+    const dg = '0123456789'
+    const all = lc + dg
+    const len = Math.floor(Math.random() * 3) + 2 // 2~4位
+    // 随机决定数字在前还是在后
+    if (Math.random() > 0.5) {
+      // 数字开头：如 4fg
+      return dg[Math.floor(Math.random() * dg.length)] +
+        Array.from({length: len - 1}, () => lc[Math.floor(Math.random() * lc.length)]).join('')
+    } else {
+      // 字母开头：如 er5
+      return lc[Math.floor(Math.random() * lc.length)] +
+        Array.from({length: len - 2}, () => all[Math.floor(Math.random() * all.length)]).join('') +
+        dg[Math.floor(Math.random() * dg.length)]
+    }
+  }
   const formats = [
     () => `${adj()}-${num()}-${noun()}`,      // swift-42-panda
     () => `${adj()}-${noun()}-${num()}`,      // swift-panda-42
@@ -241,6 +258,9 @@ function generateUsername() {
     () => `${adj()}-${num()}-${adj()}`,       // swift-42-bold
     () => `${noun()}-${num()}-${noun()}`,     // panda-42-river
     () => `${adj()}-${noun()}-${adj()}`,      // swift-panda-bold
+    () => `${adj()}-${alphanum()}`,           // swift-4fg
+    () => `${noun()}-${alphanum()}`,          // panda-er5
+    () => `${adj()}-${noun()}-${alphanum()}`, // swift-panda-x2k
   ]
   return formats[Math.floor(Math.random() * formats.length)]()
 }
