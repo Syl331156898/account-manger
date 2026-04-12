@@ -228,10 +228,21 @@ const GH_NOUNS = [
 ]
 
 function generateUsername() {
-  const adj = GH_ADJECTIVES[Math.floor(Math.random() * GH_ADJECTIVES.length)]
-  const noun = GH_NOUNS[Math.floor(Math.random() * GH_NOUNS.length)]
-  const num = Math.floor(Math.random() * 90) + 10
-  return `${adj}-${noun}-${num}`
+  const adj = () => GH_ADJECTIVES[Math.floor(Math.random() * GH_ADJECTIVES.length)]
+  const noun = () => GH_NOUNS[Math.floor(Math.random() * GH_NOUNS.length)]
+  const num = () => Math.floor(Math.random() * 900) + 10
+  // 格式列表：必须字母开头，中间有 -，以数字或字母结尾
+  const formats = [
+    () => `${adj()}-${num()}-${noun()}`,      // swift-42-panda
+    () => `${adj()}-${noun()}-${num()}`,      // swift-panda-42
+    () => `${adj()}-${num()}`,                // swift-42
+    () => `${noun()}-${num()}`,               // panda-42
+    () => `${adj()}-${noun()}`,               // swift-panda
+    () => `${adj()}-${num()}-${adj()}`,       // swift-42-bold
+    () => `${noun()}-${num()}-${noun()}`,     // panda-42-river
+    () => `${adj()}-${noun()}-${adj()}`,      // swift-panda-bold
+  ]
+  return formats[Math.floor(Math.random() * formats.length)]()
 }
 
 function generateAccount() {
