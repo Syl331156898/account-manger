@@ -12,7 +12,26 @@
   <link rel="stylesheet" href="style.css" />
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        // 已有 waiting 的新 SW（页面刷新后发现）
+        if (reg.waiting) reg.waiting.postMessage('skipWaiting')
+
+        // 安装过程中发现新版本
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              newSW.postMessage('skipWaiting')
+            }
+          })
+        })
+      })
+
+      // SW 切换控制权后刷新页面
+      let refreshing = false
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) { refreshing = true; window.location.reload() }
+      })
     }
   </script>
 </head>
