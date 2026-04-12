@@ -85,14 +85,13 @@ async function syncToCloud(isAuto = false) {
   }
 }
 
-async function syncFromCloud() {
+async function syncFromCloud(silent = false) {
   const config = getSyncConfig()
   if (!config.token || !config.gistId) {
-    showToast('请先配置正确的 Token 和 Gist ID')
+    if (!silent) showToast('请先配置正确的 Token 和 Gist ID')
     return
   }
-  
-  showToast('正在从云端拉取数据...')
+  if (!silent) showToast('正在从云端拉取数据...')
   try {
     const res = await fetch(`https://api.github.com/gists/${config.gistId}`, {
       method: 'GET',
@@ -101,26 +100,24 @@ async function syncFromCloud() {
         'Authorization': `Bearer ${config.token}`
       }
     })
-    
     if (res.ok) {
-      const gist = await res.json();
-      const file = gist.files["accounts_data.json"];
+      const gist = await res.json()
+      const file = gist.files['accounts_data.json']
       if (file && file.content) {
-        const data = JSON.parse(file.content);
-        if (data.accounts) localStorage.setItem('accounts', JSON.stringify(data.accounts));
-        if (data.allTags) localStorage.setItem('allTags', JSON.stringify(data.allTags));
-        
-        renderList();
-        showToast('✅ 成功拉取并覆盖本地数据！')
+        const data = JSON.parse(file.content)
+        if (data.accounts) localStorage.setItem('accounts', JSON.stringify(data.accounts))
+        if (data.allTags) localStorage.setItem('allTags', JSON.stringify(data.allTags))
+        renderList()
+        showToast('✅ 云端数据已更新')
       } else {
-        showToast('❌ Gist 中没找到 accounts_data.json')
+        if (!silent) showToast('❌ Gist 中没找到 accounts_data.json')
       }
     } else {
-      showToast('❌ 拉取失败，请检查凭证是否正确')
+      if (!silent) showToast('❌ 拉取失败，请检查凭证是否正确')
     }
   } catch (error) {
     console.error(error)
-    showToast('❌ 网络请求失败')
+    if (!silent) showToast('❌ 网络请求失败')
   }
 }
 
@@ -857,38 +854,67 @@ function showToast(msg) {
   }, 2000)
 }
 
-// ==================== 初始化 ====================
-migrateAccounts()
+// ==================== 下拉刷新 ====================
+function initPullToRefresh() {
+  const list = document.getElementById('accountList')
+  const indicator = document.getElementById('pullRefreshIndicator')
+  const text = document.getElementById('pullRefreshText')
+  const arrow = document.getElementById('pullArrow')
+  let startY = 0, pulling = false, triggered = false
 
-// 启动时静默从云端拉取最新数据
-async function autoSyncOnStart() {
-  const config = getSyncConfig()
-  if (!config.token || !config.gistId) return
-  try {
-    const res = await fetch(`https://api.github.com/gists/${config.gistId}`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'Authorization': `Bearer ${config.token}`
-      }
-    })
-    if (!res.ok) return
-    const gist = await res.json()
-    const file = gist.files['accounts_data.json']
-    if (!file || !file.content) return
-    const data = JSON.parse(file.content)
-    if (data.accounts) localStorage.setItem('accounts', JSON.stringify(data.accounts))
-    if (data.allTags) localStorage.setItem('allTags', JSON.stringify(data.allTags))
-    renderList()
-  } catch (e) {}
+  const THRESHOLD = 60
+
+  list.addEventListener('touchstart', e => {
+    if (list.scrollTop === 0) {
+      startY = e.touches[0].clientY
+      pulling = true
+      triggered = false
+    }
+  }, { passive: true })
+
+  list.addEventListener('touchmove', e => {
+    if (!pulling) return
+    const dy = e.touches[0].clientY - startY
+    if (dy <= 0) { pulling = false; return }
+    const h = Math.min(dy * 0.4, THRESHOLD + 10)
+    indicator.style.height = h + 'px'
+    if (dy > THRESHOLD) {
+      if (!triggered) { indicator.classList.add('ready'); text.textContent = '松开立即刷新' }
+      triggered = true
+    } else {
+      indicator.classList.remove('ready')
+      text.textContent = '下拉获取云端数据'
+      triggered = false
+    }
+  }, { passive: true })
+
+  list.addEventListener('touchend', async () => {
+    if (!pulling) return
+    pulling = false
+    if (triggered) {
+      indicator.classList.remove('ready')
+      indicator.classList.add('loading')
+      indicator.style.height = '44px'
+      text.textContent = '正在同步...'
+      await syncFromCloud(true)
+      indicator.classList.remove('loading')
+    }
+    indicator.style.height = '0'
+    text.textContent = '下拉获取云端数据'
+    triggered = false
+  })
 }
+migrateAccounts()
 
 // 恢复上次所在 tab（更新刷新后保持位置）
 const _savedTab = sessionStorage.getItem('activeTab') || 'list'
 switchTab(_savedTab)
 
+// 初始化下拉刷新
+initPullToRefresh()
+
 // 启动后静默拉云端
-autoSyncOnStart()
+syncFromCloud(true)
 
 // 启动屏淡出
 window.addEventListener('load', () => {
