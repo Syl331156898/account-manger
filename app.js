@@ -313,7 +313,8 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'))
   document.getElementById(`page-${tab}`).classList.add('active')
   document.querySelector(`[data-tab="${tab}"]`).classList.add('active')
-  
+  sessionStorage.setItem('activeTab', tab)
+
   if (tab === 'list') renderList()
   if (tab === 'generator') initGeneratorPage()
   if (tab === 'sync') initSyncPage()
@@ -858,8 +859,10 @@ function showToast(msg) {
 
 // ==================== 初始化 ====================
 migrateAccounts()
-renderList()
-initGeneratorPage()
+
+// 恢复上次所在 tab（更新刷新后保持位置）
+const _savedTab = sessionStorage.getItem('activeTab') || 'list'
+switchTab(_savedTab)
 
 // 启动屏淡出
 window.addEventListener('load', () => {

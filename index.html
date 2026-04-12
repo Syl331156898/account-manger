@@ -46,16 +46,22 @@
   <!-- 底部导航 -->
   <nav class="tab-bar">
     <div class="tab-item active" data-tab="list" onclick="switchTab('list')">
-      <span class="tab-icon">☰</span>
-      <span>账号列表</span>
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <span class="tab-label">账号列表</span>
     </div>
     <div class="tab-item" data-tab="generator" onclick="switchTab('generator')">
-      <span class="tab-icon">✦</span>
-      <span>生成账号</span>
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      </div>
+      <span class="tab-label">生成账号</span>
     </div>
     <div class="tab-item" data-tab="sync" onclick="switchTab('sync')">
-      <span class="tab-icon">☁</span>
-      <span>云同步</span>
+      <div class="tab-icon-wrap">
+        <svg class="tab-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </div>
+      <span class="tab-label">云同步</span>
     </div>
   </nav>
 
@@ -103,17 +109,7 @@
         </div>
       </div>
 
-      <!-- 批量数量 -->
-      <div class="card">
-        <div class="section-title">批量生成数量</div>
-        <div class="stepper">
-          <button class="stepper-btn" onclick="changeBatch(-1)">－</button>
-          <span id="batchNum">1</span>
-          <button class="stepper-btn" onclick="changeBatch(1)">＋</button>
-        </div>
-      </div>
 
-      <button class="btn-primary" onclick="doSaveAccounts()">生成并保存</button>
     </div>
   </div>
 
