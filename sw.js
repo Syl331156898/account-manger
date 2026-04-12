@@ -1,4 +1,4 @@
-const VERSION = '1.0.25'
+const VERSION = '1.0.26'
 const CACHE = 'app-' + VERSION
 const FILES = ['./', './index.html', './app.js', './style.css', './manifest.json', './icon-192.png', './icon-512.png']
 
@@ -29,17 +29,19 @@ self.addEventListener('fetch', e => {
     return
   }
 
-  // 其他资源：cache-first，后台更新缓存
+  // 其他资源：stale-while-revalidate，先返回缓存，后台同步更新
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      const networkFetch = fetch(e.request).then(response => {
-        if (response.ok && e.request.url.startsWith('http')) {
-          caches.open(CACHE).then(c => c.put(e.request, response.clone()))
-        }
-        return response
+    caches.open(CACHE).then(cache =>
+      cache.match(e.request).then(cached => {
+        const networkFetch = fetch(e.request).then(response => {
+          if (response.ok && e.request.url.startsWith('http')) {
+            cache.put(e.request, response.clone())
+          }
+          return response
+        }).catch(() => cached)
+        return cached || networkFetch
       })
-      return cached || networkFetch
-    })
+    )
   )
 })
 

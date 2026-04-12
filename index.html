@@ -12,11 +12,14 @@
   <link rel="stylesheet" href="style.css" />
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').then(reg => {
-        // 已有 waiting 的新 SW（页面刷新后发现）
+      // 强制每次都重新检查 sw.js（绕过 HTTP 缓存）
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+        // 已有 waiting 的新 SW
         if (reg.waiting) reg.waiting.postMessage('skipWaiting')
 
-        // 安装过程中发现新版本
+        // 主动触发检查更新
+        reg.update()
+
         reg.addEventListener('updatefound', () => {
           const newSW = reg.installing
           newSW.addEventListener('statechange', () => {
@@ -27,7 +30,6 @@
         })
       })
 
-      // SW 切换控制权后刷新页面
       let refreshing = false
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!refreshing) { refreshing = true; window.location.reload() }
