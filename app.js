@@ -210,9 +210,28 @@ function generateEmail() {
   return `${generatePrefix()}@qwecht.com`
 }
 
-function generateUsername(first, last) {
+// GitHub 风格用户名：adjective-noun-number
+const GH_ADJECTIVES = [
+  'cool','swift','brave','calm','dark','eager','fair','glad','happy','jolly',
+  'kind','lively','merry','nice','proud','quiet','rapid','sharp','smart','tidy',
+  'warm','witty','zesty','bold','bright','clean','crisp','deft','epic','firm',
+  'free','fresh','grand','great','keen','lean','neat','pure','safe','true',
+  'wild','wise','young','agile','alert','alive','amber','azure','blaze','bloom',
+  'cedar','clear','cloud','coral','cozy','curly','cyber','daily','daring','dawn'
+]
+const GH_NOUNS = [
+  'panda','river','stone','cloud','flame','tiger','eagle','ocean','forest','comet',
+  'spark','frost','grove','haven','island','jungle','knight','lantern','meadow','nebula',
+  'orbit','peak','quest','ridge','shadow','thunder','valley','wave','zenith','anchor',
+  'beacon','bridge','canyon','delta','echo','falcon','glacier','harbor','inlet','jaguar',
+  'kestrel','lagoon','maple','nomad','osprey','pine','quartz','raven','sierra','tundra'
+]
+
+function generateUsername() {
+  const adj = GH_ADJECTIVES[Math.floor(Math.random() * GH_ADJECTIVES.length)]
+  const noun = GH_NOUNS[Math.floor(Math.random() * GH_NOUNS.length)]
   const num = Math.floor(Math.random() * 90) + 10
-  return `${first}-${num}-${last}`
+  return `${adj}-${noun}-${num}`
 }
 
 function generateAccount() {
@@ -221,7 +240,7 @@ function generateAccount() {
     id: Date.now().toString() + Math.random().toString(36).slice(2),
     email: generateEmail(),
     password: generatePassword(),
-    username: generateUsername(first, last),
+    username: generateUsername(),
     firstName: first,
     lastName: last,
     tags: [],
@@ -497,7 +516,7 @@ function generateAccountForDuck(prefix) {
     id: Date.now().toString() + Math.random().toString(36).slice(2),
     email: `${prefix}@duck.com`,
     password: generatePassword(),
-    username: generateUsername(first, last),
+    username: generateUsername(),
     firstName: first,
     lastName: last,
     platform: 'duck',
@@ -520,7 +539,7 @@ function generateAccountFor163() {
     id: Date.now().toString() + Math.random().toString(36).slice(2),
     email: `${username163}@126.com`,
     password: generatePassword(),
-    username: generateUsername(first, last),
+    username: generateUsername(),
     firstName: first,
     lastName: last,
     platform: '163',
@@ -550,21 +569,23 @@ function refreshPreview() {
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="preview-value" placeholder="输入完整邮箱" value="${prefix}"
-          style="border:none;outline:none;background:transparent;text-align:right;flex:1;width:0;"
+        <input id="duckPrefix" class="preview-value preview-input-wide" placeholder="输入完整邮箱" value="${prefix}"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
           oninput="updateDuckEmail(this.value)" />
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
         <input id="duckPwd" class="preview-value" value="${previewAccount.password}"
-          style="border:none;outline:none;background:transparent;text-align:right;"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
           oninput="previewAccount.password=this.value" />
+        <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">用户名</span>
         <input id="duckUsername" class="preview-value" value="${previewAccount.username}"
-          style="border:none;outline:none;background:transparent;text-align:right;"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
           oninput="previewAccount.username=this.value" />
+        <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成用户名">↻</button>
       </div>
     `
     return
@@ -573,21 +594,42 @@ function refreshPreview() {
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
-      <span class="preview-value">${previewAccount.email}</span>
+      <span class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.email}</span>
     </div>
     <div class="preview-row">
       <span class="preview-label">密码</span>
-      <span class="preview-value">${previewAccount.password}</span>
+      <span id="previewPwd" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.password}</span>
+      <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
     </div>
     <div class="preview-row">
       <span class="preview-label">用户名</span>
-      <span class="preview-value">${previewAccount.username}</span>
+      <span id="previewUsername" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.username}</span>
+      <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成用户名">↻</button>
     </div>
   `
 }
 
 function updateDuckEmail(val) {
   if (previewAccount) previewAccount.email = val
+}
+
+function refreshField(field) {
+  if (!previewAccount) return
+  if (field === 'password') {
+    const newPwd = generatePassword()
+    previewAccount.password = newPwd
+    const inputEl = document.getElementById('duckPwd')
+    const spanEl = document.getElementById('previewPwd')
+    if (inputEl) inputEl.value = newPwd
+    else if (spanEl) spanEl.textContent = newPwd
+  } else if (field === 'username') {
+    const newName = generateUsername()
+    previewAccount.username = newName
+    const inputEl = document.getElementById('duckUsername')
+    const spanEl = document.getElementById('previewUsername')
+    if (inputEl) inputEl.value = newName
+    else if (spanEl) spanEl.textContent = newName
+  }
 }
 
 function doSaveSingle() {
@@ -855,19 +897,76 @@ function markCurrentRegistered() {
 
 
 let APP_VERSION = 'V1.0.20'
-fetch('./version.json').then(r => r.json()).then(d => {
+
+// 检查版本更新
+async function checkForUpdate(silent = true) {
+  try {
+    const r = await fetch('./version.json', { cache: 'no-store' })
+    const d = await r.json()
+    const latest = 'V' + d.version
+    const el = document.getElementById('appVersion')
+    if (el) el.textContent = '当前版本 ' + latest
+
+    if (latest !== APP_VERSION) {
+      APP_VERSION = latest
+      // 通知 SW 激活新版本
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage('skipWaiting')
+      }
+      if (!silent) {
+        showToast(`🎉 已更新到 ${latest}，即将刷新`)
+        setTimeout(() => window.location.reload(true), 1500)
+      } else {
+        // 静默更新：显示一个可点击的提示条
+        showUpdateBanner(latest)
+      }
+    } else {
+      if (!silent) showToast(`已是最新版本 ${latest}`)
+    }
+  } catch (e) {
+    if (!silent) showToast('检查更新失败，请检查网络')
+  }
+}
+
+function showUpdateBanner(ver) {
+  let banner = document.getElementById('updateBanner')
+  if (!banner) {
+    banner = document.createElement('div')
+    banner.id = 'updateBanner'
+    banner.style.cssText = `
+      position:fixed;top:0;left:50%;transform:translateX(-50%);
+      width:100%;max-width:480px;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      color:#fff;text-align:center;padding:12px 16px;
+      font-size:14px;font-weight:600;z-index:9998;cursor:pointer;
+      box-shadow:0 2px 12px rgba(59,130,246,0.4);
+    `
+    banner.onclick = () => {
+      banner.remove()
+      showToast('正在刷新...')
+      setTimeout(() => window.location.reload(true), 500)
+    }
+    document.body.appendChild(banner)
+  }
+  banner.textContent = `🆕 发现新版本 ${ver}，点击立即更新`
+}
+
+function forceRefresh() {
+  checkForUpdate(false)
+}
+
+// 页面加载后检查一次，之后每 5 分钟静默检查
+fetch('./version.json', { cache: 'no-store' }).then(r => r.json()).then(d => {
   APP_VERSION = 'V' + d.version
   const el = document.getElementById('appVersion')
   if (el) el.textContent = '当前版本 ' + APP_VERSION
 }).catch(() => {})
 
-function forceRefresh() {
-  const el = document.getElementById('toast')
-  el.textContent = `更新完成，当前版本 ${APP_VERSION}`
-  el.classList.remove('hidden')
-  if ('serviceWorker' in navigator) {
-    caches.keys().then(names => names.forEach(n => caches.delete(n)))
-    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()))
-  }
-  setTimeout(() => { el.classList.add('hidden'); window.location.reload(true) }, 1000)
+// SW 控制权切换时自动刷新
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload(true)
+  })
 }
+
+setInterval(() => checkForUpdate(true), 5 * 60 * 1000)
