@@ -165,7 +165,7 @@ body {
   height: 0; overflow: hidden;
   background: var(--primary-light);
   color: var(--primary); font-size: 13px; font-weight: 500;
-  transition: height 0.15s ease;
+  transition: height 0.05s linear;
 }
 .pull-indicator svg {
   width: 16px; height: 16px; flex-shrink: 0;

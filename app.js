@@ -598,8 +598,9 @@ function refreshPreview() {
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="preview-value preview-input-wide" placeholder="输入完整邮箱" value="${prefix}"
+        <input id="duckPrefix" class="preview-value preview-input-wide" placeholder="输入邮箱" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+          autocomplete="off" autocorrect="off" spellcheck="false"
           oninput="updateDuckEmail(this.value)" />
       </div>
       <div class="preview-row">
@@ -862,7 +863,7 @@ function initPullToRefresh() {
   const arrow = document.getElementById('pullArrow')
   let startY = 0, pulling = false, triggered = false
 
-  const THRESHOLD = 60
+  const THRESHOLD = 50
 
   list.addEventListener('touchstart', e => {
     if (list.scrollTop === 0) {
@@ -876,7 +877,11 @@ function initPullToRefresh() {
     if (!pulling) return
     const dy = e.touches[0].clientY - startY
     if (dy <= 0) { pulling = false; return }
-    const h = Math.min(dy * 0.4, THRESHOLD + 10)
+    // 阻止页面原生下拉/回弹，让手势完全由我们接管
+    e.preventDefault()
+    // 阻尼：前段轻快(0.65)，超过阈值后变重，给"快到了"的手感
+    const resistance = dy < THRESHOLD ? 0.65 : 0.4
+    const h = Math.min(dy * resistance, THRESHOLD + 16)
     indicator.style.height = h + 'px'
     if (dy > THRESHOLD) {
       if (!triggered) { indicator.classList.add('ready'); text.textContent = '松开立即刷新' }
@@ -886,7 +891,7 @@ function initPullToRefresh() {
       text.textContent = '下拉获取云端数据'
       triggered = false
     }
-  }, { passive: true })
+  }, { passive: false })
 
   list.addEventListener('touchend', async () => {
     if (!pulling) return
