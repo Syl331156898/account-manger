@@ -630,7 +630,10 @@ function refreshPreview() {
   document.getElementById('previewContent').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
-      <span class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.email}</span>
+      <input id="previewEmail" class="preview-value" value="${previewAccount.email}"
+        style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+        oninput="previewAccount.email=this.value" />
+      <button class="refresh-field-btn" onclick="refreshField('email')" title="重新生成邮箱">↻</button>
     </div>
     <div class="preview-row">
       <span class="preview-label">密码</span>
@@ -651,7 +654,12 @@ function updateDuckEmail(val) {
 
 function refreshField(field) {
   if (!previewAccount) return
-  if (field === 'password') {
+  if (field === 'email') {
+    const newEmail = generateEmail()
+    previewAccount.email = newEmail
+    const inputEl = document.getElementById('previewEmail')
+    if (inputEl) inputEl.value = newEmail
+  } else if (field === 'password') {
     const newPwd = generatePassword()
     previewAccount.password = newPwd
     const inputEl = document.getElementById('duckPwd')
