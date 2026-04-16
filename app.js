@@ -1001,7 +1001,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.0.20'
+let APP_VERSION = 'V1.1.0'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
