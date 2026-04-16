@@ -186,21 +186,27 @@ function randomName() {
 }
 
 // ==================== 账号生成 ====================
+// 邮箱前缀黑名单：避免看起来像机器人/测试账号的词
+const EMAIL_PREFIX_BLACKLIST = [
+  'admin','test','user','root','info','mail','email','demo','guest','support',
+  'noreply','no-reply','postmaster','webmaster','hostmaster','abuse','spam',
+  'bot','robot','system','service','contact','hello','help','sales','team'
+]
+
 function generatePrefix() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  const symbols = '._-'
-  const length = Math.floor(Math.random() * 7) + 6
-  let prefix = ''
-  for (let i = 0; i < length; i++) {
-    const last = prefix[prefix.length - 1] || ''
-    const lastIsSymbol = symbols.includes(last)
-    if (i === 0 || i === length - 1 || lastIsSymbol || Math.random() > 0.2) {
-      prefix += chars[Math.floor(Math.random() * chars.length)]
-    } else {
-      prefix += symbols[Math.floor(Math.random() * symbols.length)]
-    }
-  }
-  return prefix
+  // 人类命名风格：名字（字母）+ 数字，如 emily23 / james847 / michael5
+  let name
+  do {
+    name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)].toLowerCase()
+  } while (EMAIL_PREFIX_BLACKLIST.includes(name))
+
+  const num = Math.floor(Math.random() * 9000) + 1  // 1 ~ 9000
+  // 随机决定是否加上姓氏首字母，增加多样性，如 emilys23 / jsmith42
+  const addLastInitial = Math.random() > 0.6
+  const lastInitial = addLastInitial
+    ? LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)][0].toLowerCase()
+    : ''
+  return `${name}${lastInitial}${num}`
 }
 
 function generateEmail() {
