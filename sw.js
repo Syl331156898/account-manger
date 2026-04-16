@@ -21,7 +21,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
 
-  // version.json 永远走网络，不缓存，用于版本检测
+  // version.json 永远走网络，不缓存
   if (url.pathname.endsWith('version.json')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request))
@@ -29,19 +29,17 @@ self.addEventListener('fetch', e => {
     return
   }
 
-  // 其他资源：stale-while-revalidate，先返回缓存，后台同步更新
+  // 网络优先：先尝试网络，失败才用缓存（确保每次都能拿到最新代码）
   e.respondWith(
-    caches.open(CACHE).then(cache =>
-      cache.match(e.request).then(cached => {
-        const networkFetch = fetch(e.request).then(response => {
-          if (response.ok && e.request.url.startsWith('http')) {
-            cache.put(e.request, response.clone())
-          }
-          return response
-        }).catch(() => cached)
-        return cached || networkFetch
+    fetch(e.request, { cache: 'no-store' })
+      .then(response => {
+        if (response.ok) {
+          const clone = response.clone()
+          caches.open(CACHE).then(cache => cache.put(e.request, clone))
+        }
+        return response
       })
-    )
+      .catch(() => caches.match(e.request))
   )
 })
 
