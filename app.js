@@ -194,19 +194,27 @@ const EMAIL_PREFIX_BLACKLIST = [
 ]
 
 function generatePrefix() {
-  // 人类命名风格：名字（字母）+ 数字，如 emily23 / james847 / michael5
+  // 人类命名风格，增加多样性
   let name
   do {
     name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)].toLowerCase()
   } while (EMAIL_PREFIX_BLACKLIST.includes(name))
 
-  const num = Math.floor(Math.random() * 9000) + 1  // 1 ~ 9000
-  // 随机决定是否加上姓氏首字母，增加多样性，如 emilys23 / jsmith42
+  // 随机决定是否加上姓氏首字母
   const addLastInitial = Math.random() > 0.6
   const lastInitial = addLastInitial
     ? LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)][0].toLowerCase()
     : ''
-  return `${name}${lastInitial}${num}`
+
+  // 数字：2~5位随机
+  const numLen = Math.floor(Math.random() * 4) + 2  // 2,3,4,5
+  const num = String(Math.floor(Math.random() * (Math.pow(10, numLen) - Math.pow(10, numLen - 1))) + Math.pow(10, numLen - 1))
+
+  // 名字和数字之间随机加符号（- 或 .），40%概率加，各占一半
+  const r = Math.random()
+  const sep = r < 0.2 ? '-' : r < 0.4 ? '.' : ''
+
+  return `${name}${lastInitial}${sep}${num}`
 }
 
 function generateEmail() {
