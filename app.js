@@ -361,7 +361,7 @@ function renderSegPanel(seg, accounts, container) {
   const segMap = { unregistered, registered, sold }
   const segFiltered = segMap[seg]
 
-  const filtered = segFiltered.filter(a => !selectedTag || a.tags.includes(selectedTag))
+  const filtered = segFiltered.filter(a => !selectedTag || a.tags.includes(selectedTag)).reverse()
 
   if (filtered.length === 0) {
     container.innerHTML = '<div class="empty">暂无账号</div>'
@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.3'
+let APP_VERSION = 'V1.2.4'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
