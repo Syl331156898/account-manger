@@ -753,8 +753,8 @@ function renderDetail() {
     </div>
     <div class="info-row">
       <span class="info-label">密码</span>
-      <input class="info-input" id="detailPwd" value="${a.password}" onblur="savePassword()" />
-      <button class="copy-btn" onclick="copyText(document.getElementById('detailPwd').value, '密码')">复制</button>
+      <span class="info-value">${a.password}</span>
+      <button class="copy-btn" onclick="copyText('${a.password}', '密码')">复制</button>
     </div>
     <div class="info-row">
       <span class="info-label">用户名</span>
@@ -777,13 +777,6 @@ function renderDetail() {
     </div>` : ''}
 
     <div class="detail-section">
-      <div class="favorite-row">
-        <span class="favorite-label">收藏</span>
-        <input type="checkbox" ${a.isFavorite ? 'checked' : ''} onchange="updateFavorite(this.checked)" style="width:20px;height:20px;cursor:pointer" />
-      </div>
-    </div>
-
-    <div class="detail-section">
       <div class="detail-section-title">备注</div>
       <textarea class="detail-textarea" id="noteInput" onblur="saveNote()">${a.note}</textarea>
     </div>
@@ -798,9 +791,11 @@ function renderDetail() {
           </div>
         `).join('')}
       </div>
-      <div class="add-tag-row">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
         <button onclick="addPresetTag('Kiro')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Kiro</button>
         <button onclick="addPresetTag('Trae')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Trae</button>
+      </div>
+      <div class="add-tag-row">
         <input type="text" id="newTagInput" placeholder="输入新标签" maxlength="10" onkeydown="if(event.key==='Enter') addTag()" />
         <button onclick="addTag()">添加</button>
       </div>
@@ -1009,7 +1004,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.1'
+let APP_VERSION = 'V1.1.2'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
