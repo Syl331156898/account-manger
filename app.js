@@ -1086,7 +1086,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.6'
+let APP_VERSION = 'V1.1.7'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
@@ -1098,18 +1098,13 @@ async function checkForUpdate(silent = true) {
     if (el) el.textContent = '当前版本 ' + latest
 
     if (latest !== APP_VERSION) {
-      APP_VERSION = latest
-      // 通知 SW 激活新版本
+      // 通知 SW 预加载新版本
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage('skipWaiting')
       }
-      if (!silent) {
-        showToast(`🎉 已更新到 ${latest}，即将刷新`)
-        setTimeout(() => window.location.reload(true), 1500)
-      } else {
-        // 静默更新：显示一个可点击的提示条
-        showUpdateBanner(latest)
-      }
+      // 无论 silent 与否，都弹窗让用户决定
+      showUpdateDialog(APP_VERSION, latest)
+      APP_VERSION = latest
     } else {
       if (!silent) showToast(`已是最新版本 ${latest}`)
     }
@@ -1118,27 +1113,54 @@ async function checkForUpdate(silent = true) {
   }
 }
 
-function showUpdateBanner(ver) {
-  let banner = document.getElementById('updateBanner')
-  if (!banner) {
-    banner = document.createElement('div')
-    banner.id = 'updateBanner'
-    banner.style.cssText = `
-      position:fixed;top:0;left:50%;transform:translateX(-50%);
-      width:100%;max-width:480px;
-      background:linear-gradient(135deg,#3b82f6,#2563eb);
-      color:#fff;text-align:center;padding:12px 16px;
-      font-size:14px;font-weight:600;z-index:9998;cursor:pointer;
-      box-shadow:0 2px 12px rgba(59,130,246,0.4);
-    `
-    banner.onclick = () => {
-      banner.remove()
-      showToast('正在刷新...')
-      setTimeout(() => window.location.reload(true), 500)
-    }
-    document.body.appendChild(banner)
+function showUpdateDialog(oldVer, newVer) {
+  // 避免重复弹
+  if (document.getElementById('updateDialog')) return
+
+  const mask = document.createElement('div')
+  mask.id = 'updateDialog'
+  mask.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(15,23,42,0.55);backdrop-filter:blur(3px);
+  `
+
+  mask.innerHTML = `
+    <div style="
+      background:#fff;border-radius:20px;padding:28px 24px 20px;
+      width:calc(100% - 48px);max-width:320px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.2);
+      animation:fadeIn 0.25s ease;
+    ">
+      <div style="font-size:32px;text-align:center;margin-bottom:12px;">🆕</div>
+      <div style="font-size:17px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:8px;">发现新版本</div>
+      <div style="font-size:13px;color:#64748b;text-align:center;margin-bottom:24px;">
+        ${oldVer} → <span style="color:#3b82f6;font-weight:600;">${newVer}</span>
+      </div>
+      <button id="updateNowBtn" style="
+        width:100%;padding:13px;background:linear-gradient(135deg,#3b82f6,#2563eb);
+        color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;
+        cursor:pointer;margin-bottom:10px;
+        box-shadow:0 4px 12px rgba(59,130,246,0.35);
+      ">立即更新</button>
+      <button id="updateLaterBtn" style="
+        width:100%;padding:13px;background:#f1f5f9;
+        color:#64748b;border:none;border-radius:12px;font-size:15px;font-weight:500;
+        cursor:pointer;
+      ">稍后再说</button>
+    </div>
+  `
+
+  document.body.appendChild(mask)
+
+  document.getElementById('updateNowBtn').onclick = () => {
+    mask.remove()
+    showToast('正在更新...')
+    setTimeout(() => window.location.reload(true), 600)
   }
-  banner.textContent = `🆕 发现新版本 ${ver}，点击立即更新`
+  document.getElementById('updateLaterBtn').onclick = () => {
+    mask.remove()
+  }
 }
 
 function forceRefresh() {
