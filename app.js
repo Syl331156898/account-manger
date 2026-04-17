@@ -644,11 +644,11 @@ function refreshPreview() {
         <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
       </div>
       <div class="preview-row">
-        <span class="preview-label">用户名</span>
+        <span class="preview-label">姓名</span>
         <input id="duckUsername" class="preview-value" value="${previewAccount.username}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
           oninput="previewAccount.username=this.value" />
-        <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成用户名">↻</button>
+        <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成姓名">↻</button>
       </div>
     `
     return
@@ -656,11 +656,11 @@ function refreshPreview() {
   previewAccount = generateAccount()
   document.getElementById('previewContentGithub').innerHTML = `
     <div class="preview-row">
-      <span class="preview-label">邮箱</span>
+      <span class="preview-label">账号</span>
       <input id="previewEmail" class="preview-value" value="${previewAccount.email}"
         style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
         oninput="previewAccount.email=this.value" />
-      <button class="refresh-field-btn" onclick="refreshField('email')" title="重新生成邮箱">↻</button>
+      <button class="refresh-field-btn" onclick="refreshField('email')" title="重新生成账号">↻</button>
     </div>
     <div class="preview-row">
       <span class="preview-label">密码</span>
@@ -668,9 +668,9 @@ function refreshPreview() {
       <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
     </div>
     <div class="preview-row">
-      <span class="preview-label">用户名</span>
+      <span class="preview-label">姓名</span>
       <span id="previewUsername" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.username}</span>
-      <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成用户名">↻</button>
+      <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成姓名">↻</button>
     </div>
   `
 }
@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.1'
+let APP_VERSION = 'V1.2.2'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
@@ -1191,29 +1191,28 @@ function showUpdateDialog(oldVer, newVer) {
 
   mask.innerHTML = `
     <div style="
-      background:#fff;border-radius:20px;padding:28px 24px 20px;
+      position:relative;background:#fff;border-radius:20px;padding:28px 24px 24px;
       width:calc(100% - 48px);max-width:320px;
       box-shadow:0 20px 60px rgba(0,0,0,0.2);
       animation:fadeIn 0.25s ease;
     ">
+      <button id="updateCloseBtn" style="
+        position:absolute;top:14px;right:14px;
+        width:28px;height:28px;border-radius:50%;border:none;
+        background:#f1f5f9;color:#94a3b8;font-size:16px;
+        cursor:pointer;display:flex;align-items:center;justify-content:center;
+        line-height:1;
+      ">✕</button>
       <div style="font-size:32px;text-align:center;margin-bottom:12px;">🆕</div>
       <div style="font-size:17px;font-weight:700;color:#0f172a;text-align:center;margin-bottom:8px;">发现新版本</div>
       <div style="font-size:13px;color:#64748b;text-align:center;margin-bottom:24px;">
         ${oldVer} → <span style="color:#3b82f6;font-weight:600;">${newVer}</span>
       </div>
-      <div style="display:flex;gap:10px;">
-        <button id="updateLaterBtn" style="
-          flex:1;padding:13px;background:#f1f5f9;
-          color:#64748b;border:none;border-radius:12px;font-size:15px;font-weight:500;
-          cursor:pointer;
-        ">稍后再说</button>
-        <button id="updateNowBtn" style="
-          flex:1;padding:13px;background:linear-gradient(135deg,#3b82f6,#2563eb);
-          color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;
-          cursor:pointer;
-          box-shadow:0 4px 12px rgba(59,130,246,0.35);
-        ">立即更新</button>
-      </div>
+      <button id="updateNowBtn" style="
+        width:100%;padding:13px;background:linear-gradient(135deg,#3b82f6,#2563eb);
+        color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;
+        cursor:pointer;box-shadow:0 4px 12px rgba(59,130,246,0.35);
+      ">立即更新</button>
     </div>
   `
 
@@ -1224,7 +1223,7 @@ function showUpdateDialog(oldVer, newVer) {
     showToast('正在更新...')
     setTimeout(() => window.location.reload(true), 600)
   }
-  document.getElementById('updateLaterBtn').onclick = () => {
+  document.getElementById('updateCloseBtn').onclick = () => {
     mask.remove()
   }
 }
