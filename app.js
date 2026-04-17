@@ -774,9 +774,9 @@ function renderDetail() {
 
   document.getElementById('detailContent').innerHTML = `
     <div class="info-row">
-      <span class="info-label">邮箱</span>
+      <span class="info-label">账号</span>
       <span class="info-value">${a.email}</span>
-      <button class="copy-btn" onclick="copyText('${a.email}', '邮箱')">复制</button>
+      <button class="copy-btn" onclick="copyText('${a.email}', '账号')">复制</button>
     </div>
     <div class="info-row">
       <span class="info-label">密码</span>
@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.8'
+let APP_VERSION = 'V1.1.9'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
