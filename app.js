@@ -784,9 +784,9 @@ function renderDetail() {
       <button class="copy-btn" onclick="copyText('${a.password}', '密码')">复制</button>
     </div>
     <div class="info-row">
-      <span class="info-label">用户名</span>
+      <span class="info-label">姓名</span>
       <span class="info-value">${a.username}</span>
-      <button class="copy-btn" onclick="copyText('${a.username}', '用户名')">复制</button>
+      <button class="copy-btn" onclick="copyText('${a.username}', '姓名')">复制</button>
     </div>
     <div class="info-row">
       <span class="info-label">创建时间</span>
@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.2'
+let APP_VERSION = 'V1.2.3'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
