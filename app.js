@@ -777,11 +777,6 @@ function renderDetail() {
     </div>` : ''}
 
     <div class="detail-section">
-      <div class="detail-section-title">备注</div>
-      <textarea class="detail-textarea" id="noteInput" onblur="saveNote()">${a.note}</textarea>
-    </div>
-
-    <div class="detail-section">
       <div class="detail-section-title">标签</div>
       <div class="tag-manage" id="tagManage">
         ${a.tags.map(t => `
@@ -791,14 +786,15 @@ function renderDetail() {
           </div>
         `).join('')}
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <button onclick="addPresetTag('Kiro')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Kiro</button>
-        <button onclick="addPresetTag('Trae')" style="background:#f0f0f0;color:#333;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;">+ Trae</button>
-      </div>
       <div class="add-tag-row">
         <input type="text" id="newTagInput" placeholder="输入新标签" maxlength="10" onkeydown="if(event.key==='Enter') addTag()" />
         <button onclick="addTag()">添加</button>
       </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">备注</div>
+      <textarea class="detail-textarea" id="noteInput" onblur="saveNote()">${a.note}</textarea>
     </div>
   `
 }
@@ -1004,7 +1000,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.2'
+let APP_VERSION = 'V1.1.3'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {

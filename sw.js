@@ -1,4 +1,4 @@
-const VERSION = '1.1.2'
+const VERSION = '1.1.3'
 const CACHE = 'app-' + VERSION
 const FILES = ['./', './index.html', './app.js', './style.css', './manifest.json', './icon-192.png', './icon-512.png']
 
