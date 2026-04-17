@@ -630,8 +630,8 @@ function refreshPreview() {
     previewAccount = generateAccountForDuck(prefix)
     document.getElementById('previewContent').innerHTML = `
       <div class="preview-row">
-        <span class="preview-label">邮箱</span>
-        <input id="duckPrefix" class="preview-value preview-input-wide" placeholder="输入邮箱" value="${prefix}"
+        <span class="preview-label">账号</span>
+        <input id="duckPrefix" class="preview-value preview-input-wide" placeholder="输入账号" value="${prefix}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
           autocomplete="off" autocorrect="off" spellcheck="false"
           oninput="updateDuckEmail(this.value)" />
@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.0'
+let APP_VERSION = 'V1.2.1'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
