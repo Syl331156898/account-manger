@@ -939,6 +939,45 @@ switchTab(_savedTab)
 // 初始化下拉刷新
 initPullToRefresh()
 
+// ==================== 左右滑动切换分栏 ====================
+function initSwipeSegment() {
+  const el = document.getElementById('accountList')
+  const SEGS = ['unregistered', 'registered', 'sold']
+  let startX = 0, startY = 0, locked = false
+
+  el.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX
+    startY = e.touches[0].clientY
+    locked = false
+  }, { passive: true })
+
+  el.addEventListener('touchmove', e => {
+    if (locked) return
+    const dx = e.touches[0].clientX - startX
+    const dy = e.touches[0].clientY - startY
+    // 水平位移明显大于垂直才触发，避免干扰上下滚动
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+      locked = true
+    }
+  }, { passive: true })
+
+  el.addEventListener('touchend', e => {
+    if (!locked) return
+    const dx = e.changedTouches[0].clientX - startX
+    const dy = e.changedTouches[0].clientY - startY
+    if (Math.abs(dx) < Math.abs(dy) || Math.abs(dx) < 50) return
+    const idx = SEGS.indexOf(currentSeg)
+    if (dx < 0 && idx < SEGS.length - 1) {
+      // 左滑 → 下一个
+      switchSeg(SEGS[idx + 1])
+    } else if (dx > 0 && idx > 0) {
+      // 右滑 → 上一个
+      switchSeg(SEGS[idx - 1])
+    }
+  }, { passive: true })
+}
+initSwipeSegment()
+
 // 启动后静默拉云端
 syncFromCloud(true)
 
@@ -1008,7 +1047,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.4'
+let APP_VERSION = 'V1.1.5'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
