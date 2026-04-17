@@ -1176,4 +1176,4 @@ fetch('./version.json', { cache: 'no-store' }).then(r => r.json()).then(d => {
 
 // SW 控制权切换时自动刷新（由 index.html 统一处理）
 
-setInterval(() => checkForUpdate(true), 5 * 60 * 1000)
+setInterval(() => checkForUpdate(true), 30 * 1000)
