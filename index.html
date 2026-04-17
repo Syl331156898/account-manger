@@ -110,19 +110,32 @@
       <div class="seg-item active" id="gen-seg-duck" onclick="switchGenSeg('duck')">Duck邮箱</div>
       <div class="seg-item" id="gen-seg-github" onclick="switchGenSeg('github')">GitHub</div>
     </div>
-    <div class="page-content">
-
-      <!-- 预览 -->
-      <div class="card">
-        <div class="section-title">预览（姓名、密码自动随机生成）</div>
-        <div id="previewContent"></div>
-        <div style="display:flex;gap:8px;margin-top:12px;">
-          <button class="btn-outline" style="flex:1;margin-top:0" onclick="refreshPreview()">换一个</button>
-          <button class="btn-outline" style="flex:1;margin-top:0;color:#34c759;border-color:#34c759" onclick="doSaveSingle()">保存账号</button>
+    <!-- 滑动容器 -->
+    <div id="genSwipeWrapper" style="flex:1;overflow:hidden;position:relative;">
+      <div id="genSwipeTrack" style="display:flex;width:200%;height:100%;will-change:transform;transition:none;">
+        <!-- Duck 面板 -->
+        <div class="page-content" id="gen-panel-duck" style="width:50%;flex-shrink:0;">
+          <div class="card">
+            <div class="section-title">预览（姓名、密码自动随机生成）</div>
+            <div id="previewContent"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn-outline" style="flex:1;margin-top:0" onclick="refreshPreview()">换一个</button>
+              <button class="btn-outline" style="flex:1;margin-top:0;color:#34c759;border-color:#34c759" onclick="doSaveSingle()">保存账号</button>
+            </div>
+          </div>
+        </div>
+        <!-- GitHub 面板 -->
+        <div class="page-content" id="gen-panel-github" style="width:50%;flex-shrink:0;">
+          <div class="card">
+            <div class="section-title">预览（姓名、密码自动随机生成）</div>
+            <div id="previewContentGithub"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn-outline" style="flex:1;margin-top:0" onclick="refreshPreview()">换一个</button>
+              <button class="btn-outline" style="flex:1;margin-top:0;color:#34c759;border-color:#34c759" onclick="doSaveSingle()">保存账号</button>
+            </div>
+          </div>
         </div>
       </div>
-
-
     </div>
   </div>
 
@@ -161,7 +174,7 @@
         </div>
       </div>
 
-      <div id="appVersion" style="text-align:center;padding:16px 0;font-size:12px;color:#bbb;">当前版本 V1.1.7</div>
+      <div id="appVersion" style="text-align:center;padding:16px 0;font-size:12px;color:#bbb;">当前版本 V1.1.8</div>
     </div>
   </div>
 

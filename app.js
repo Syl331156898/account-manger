@@ -503,11 +503,19 @@ function setStatus(id, status) {
 let previewAccount = null
 let currentGenPlatform = 'duck'
 
-function switchGenSeg(platform) {
+const GEN_SEGS = ['duck', 'github']
+
+function switchGenSeg(platform, animate = true) {
   currentGenPlatform = platform
   document.querySelectorAll('#gen-seg-github, #gen-seg-duck').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
+  const idx = GEN_SEGS.indexOf(platform)
+  const track = document.getElementById('genSwipeTrack')
+  if (track) {
+    track.style.transition = animate ? 'transform 0.32s cubic-bezier(0.25,1,0.5,1)' : 'none'
+    track.style.transform = `translateX(-${idx * 50}%)`
+  }
 }
 
 function generate163Username() {
@@ -646,7 +654,7 @@ function refreshPreview() {
     return
   }
   previewAccount = generateAccount()
-  document.getElementById('previewContent').innerHTML = `
+  document.getElementById('previewContentGithub').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">邮箱</span>
       <input id="previewEmail" class="preview-value" value="${previewAccount.email}"
@@ -1017,6 +1025,62 @@ function initSwipeSegment() {
 }
 initSwipeSegment()
 
+// ==================== 生成页左右滑动 ====================
+function initGenSwipe() {
+  const wrapper = document.getElementById('genSwipeWrapper')
+  const track = document.getElementById('genSwipeTrack')
+  if (!wrapper || !track) return
+
+  let startX = 0, startY = 0, curX = 0
+  let dragging = false, dirLocked = false, isHoriz = false
+  const W = () => wrapper.offsetWidth
+
+  wrapper.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX
+    startY = e.touches[0].clientY
+    curX = 0
+    dragging = true
+    dirLocked = false
+    isHoriz = false
+    track.style.transition = 'none'
+  }, { passive: true })
+
+  wrapper.addEventListener('touchmove', e => {
+    if (!dragging) return
+    const dx = e.touches[0].clientX - startX
+    const dy = e.touches[0].clientY - startY
+    if (!dirLocked) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        dirLocked = true
+        isHoriz = Math.abs(dx) > Math.abs(dy)
+      }
+    }
+    if (!isHoriz) return
+    curX = dx
+    const idx = GEN_SEGS.indexOf(currentGenPlatform)
+    let resistance = 1
+    if ((idx === 0 && dx > 0) || (idx === GEN_SEGS.length - 1 && dx < 0)) resistance = 0.2
+    const base = -(idx * W())
+    track.style.transform = `translateX(${base + curX * resistance}px)`
+  }, { passive: true })
+
+  wrapper.addEventListener('touchend', () => {
+    if (!dragging || !isHoriz) { dragging = false; return }
+    dragging = false
+    const idx = GEN_SEGS.indexOf(currentGenPlatform)
+    const threshold = W() * 0.25
+    if (curX < -threshold && idx < GEN_SEGS.length - 1) {
+      switchGenSeg(GEN_SEGS[idx + 1])
+    } else if (curX > threshold && idx > 0) {
+      switchGenSeg(GEN_SEGS[idx - 1])
+    } else {
+      track.style.transition = 'transform 0.32s cubic-bezier(0.25,1,0.5,1)'
+      track.style.transform = `translateX(${-(idx * W())}px)`
+    }
+  }, { passive: true })
+}
+initGenSwipe()
+
 // 启动后静默拉云端
 syncFromCloud(true)
 
@@ -1086,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.7'
+let APP_VERSION = 'V1.1.8'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
