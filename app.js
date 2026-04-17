@@ -740,6 +740,14 @@ function closeDetail() {
   renderList()
 }
 
+function copyAccountInfo() {
+  const accounts = getAccounts()
+  const a = accounts.find(x => x.id === currentDetailId)
+  if (!a) return
+  const text = `账号：${a.email}\n密码：${a.password}`
+  copyText(text, '账号信息')
+}
+
 function renderDetail() {
   const accounts = getAccounts()
   const a = accounts.find(x => x.id === currentDetailId)
@@ -1000,7 +1008,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.3'
+let APP_VERSION = 'V1.1.4'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
