@@ -1150,7 +1150,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.9'
+let APP_VERSION = 'V1.2.0'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
@@ -1201,17 +1201,19 @@ function showUpdateDialog(oldVer, newVer) {
       <div style="font-size:13px;color:#64748b;text-align:center;margin-bottom:24px;">
         ${oldVer} → <span style="color:#3b82f6;font-weight:600;">${newVer}</span>
       </div>
-      <button id="updateNowBtn" style="
-        width:100%;padding:13px;background:linear-gradient(135deg,#3b82f6,#2563eb);
-        color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;
-        cursor:pointer;margin-bottom:10px;
-        box-shadow:0 4px 12px rgba(59,130,246,0.35);
-      ">立即更新</button>
-      <button id="updateLaterBtn" style="
-        width:100%;padding:13px;background:#f1f5f9;
-        color:#64748b;border:none;border-radius:12px;font-size:15px;font-weight:500;
-        cursor:pointer;
-      ">稍后再说</button>
+      <div style="display:flex;gap:10px;">
+        <button id="updateLaterBtn" style="
+          flex:1;padding:13px;background:#f1f5f9;
+          color:#64748b;border:none;border-radius:12px;font-size:15px;font-weight:500;
+          cursor:pointer;
+        ">稍后再说</button>
+        <button id="updateNowBtn" style="
+          flex:1;padding:13px;background:linear-gradient(135deg,#3b82f6,#2563eb);
+          color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;
+          cursor:pointer;
+          box-shadow:0 4px 12px rgba(59,130,246,0.35);
+        ">立即更新</button>
+      </div>
     </div>
   `
 
@@ -1231,13 +1233,6 @@ function forceRefresh() {
   checkForUpdate(false)
 }
 
-// 页面加载后检查一次，之后每 5 分钟静默检查
-fetch('./version.json', { cache: 'no-store' }).then(r => r.json()).then(d => {
-  APP_VERSION = 'V' + d.version
-  const el = document.getElementById('appVersion')
-  if (el) el.textContent = '当前版本 ' + APP_VERSION
-}).catch(() => {})
-
-// SW 控制权切换时自动刷新（由 index.html 统一处理）
-
+// 页面加载后立即检测一次，之后每30秒静默检查
+checkForUpdate(true)
 setInterval(() => checkForUpdate(true), 30 * 1000)
