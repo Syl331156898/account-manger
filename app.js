@@ -311,11 +311,24 @@ function switchPlatform(platform) {
   renderList()
 }
 
-function switchSeg(seg) {
+const SEGS = ['unregistered', 'registered', 'sold']
+
+function switchSeg(seg, animate = true) {
   currentSeg = seg
   document.querySelectorAll('#seg-unregistered, #seg-registered, #seg-sold').forEach(el => el.classList.remove('active'))
   document.getElementById(`seg-${seg}`).classList.add('active')
   renderList()
+  // 滑动轨道定位
+  const idx = SEGS.indexOf(seg)
+  const track = document.getElementById('swipeTrack')
+  if (track) {
+    if (animate) {
+      track.style.transition = 'transform 0.32s cubic-bezier(0.25,1,0.5,1)'
+    } else {
+      track.style.transition = 'none'
+    }
+    track.style.transform = `translateX(-${idx * 33.333}%)`
+  }
 }
 
 // ==================== Tab 切换 ====================
@@ -340,29 +353,80 @@ function initSyncPage() {
 }
 
 // ==================== 列表页 ====================
+function renderSegPanel(seg, accounts, container) {
+  const p = currentPlatform
+  const unregistered = accounts.filter(a => { const s = a.platforms?.[p]; return s && !s.registered && !s.sold })
+  const registered   = accounts.filter(a => { const s = a.platforms?.[p]; return s && s.registered && !s.sold })
+  const sold         = accounts.filter(a => { const s = a.platforms?.[p]; return s && s.sold })
+  const segMap = { unregistered, registered, sold }
+  const segFiltered = segMap[seg]
+
+  const filtered = segFiltered.filter(a => !selectedTag || a.tags.includes(selectedTag))
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty">暂无账号</div>'
+    return
+  }
+
+  container.innerHTML = filtered.map(a => {
+    let actionBtn = ''
+    if (seg === 'unregistered') {
+      actionBtn = `<button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">标记已注册</button>`
+    } else if (seg === 'registered') {
+      actionBtn = `
+        <button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'unregistered')">移回未注册</button>
+        <button class="sold-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'sold')">标记号已出</button>`
+    } else if (seg === 'sold') {
+      actionBtn = `<button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">移回已注册</button>`
+    }
+    return `
+      <div class="account-card" onclick="openDetail('${a.id}')">
+        <div class="card-row">
+          <span class="card-label">账号</span>
+          <span class="email">${a.email}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.email}', '账号')">复制</button>
+        </div>
+        <div class="card-row">
+          <span class="card-label">密码</span>
+          <span class="card-pwd">${a.password}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.password}', '密码')">复制</button>
+        </div>
+        <div class="card-row">
+          <span class="card-label">姓名</span>
+          <span class="card-pwd">${a.username}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.username}', '姓名')">复制</button>
+        </div>
+        ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
+        <div class="card-bottom">
+          <span class="date">${
+            seg === 'unregistered' ? `生成日期 ${a.createdAt}` :
+            seg === 'registered'   ? `注册日期 ${a.platforms?.[currentPlatform]?.registeredAt || a.createdAt}` :
+            `出售日期 ${a.platforms?.[currentPlatform]?.soldAt || a.createdAt}`
+          }</span>
+          <div style="display:flex;gap:10px;align-items:center">
+            ${actionBtn}
+            <button class="delete-btn" onclick="event.stopPropagation(); deleteAccount('${a.id}')">删除</button>
+          </div>
+        </div>
+      </div>`
+  }).join('')
+}
+
 function renderList() {
   const accounts = getAccounts()
   const p = currentPlatform
 
-  const unregistered = accounts.filter(a => {
-    const s = a.platforms?.[p]
-    return s && !s.registered && !s.sold
-  })
-  const registered = accounts.filter(a => {
-    const s = a.platforms?.[p]
-    return s && s.registered && !s.sold
-  })
-  const sold = accounts.filter(a => {
-    const s = a.platforms?.[p]
-    return s && s.sold
-  })
+  const unregistered = accounts.filter(a => { const s = a.platforms?.[p]; return s && !s.registered && !s.sold })
+  const registered   = accounts.filter(a => { const s = a.platforms?.[p]; return s && s.registered && !s.sold })
+  const sold         = accounts.filter(a => { const s = a.platforms?.[p]; return s && s.sold })
 
   document.getElementById('seg-unregistered').textContent = `未注册 ${unregistered.length}`
-  document.getElementById('seg-registered').textContent = `已注册 ${registered.length}`
-  document.getElementById('seg-sold').textContent = `号已出 ${sold.length}`
+  document.getElementById('seg-registered').textContent   = `已注册 ${registered.length}`
+  document.getElementById('seg-sold').textContent         = `号已出 ${sold.length}`
 
-  const segFiltered = currentSeg === 'unregistered' ? unregistered : currentSeg === 'registered' ? registered : sold
-
+  // 标签筛选（基于当前分栏）
+  const segMap = { unregistered, registered, sold }
+  const segFiltered = segMap[currentSeg]
   const allTags = [...new Set(segFiltered.flatMap(a => a.tags))]
   const tagFilter = document.getElementById('tagFilter')
   tagFilter.innerHTML = ''
@@ -384,64 +448,11 @@ function renderList() {
     tagFilter.style.display = 'none'
   }
 
-  const filtered = segFiltered.filter(a =>
-    !selectedTag || a.tags.includes(selectedTag)
-  )
-
-  const container = document.getElementById('accountList')
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="empty">暂无账号</div>'
-    return
-  }
-
-  container.innerHTML = filtered.map(a => {
-    // 底部操作按钮逻辑
-    let actionBtn = ''
-    if (currentSeg === 'unregistered') {
-      actionBtn = `
-        <button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">标记已注册</button>
-      `
-    } else if (currentSeg === 'registered') {
-      actionBtn = `
-        <button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'unregistered')">移回未注册</button>
-        <button class="sold-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'sold')">标记号已出</button>
-      `
-    } else if (currentSeg === 'sold') {
-      actionBtn = `<button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">移回已注册</button>`
-    }
-
-    return `
-      <div class="account-card" onclick="openDetail('${a.id}')">
-        <div class="card-row">
-          <span class="card-label">账号</span>
-          <span class="email">${a.email}</span>
-          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.email}', '账号')">复制</button>
-        </div>
-        <div class="card-row">
-          <span class="card-label">密码</span>
-          <span class="card-pwd">${a.password}</span>
-          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.password}', '密码')">复制</button>
-        </div>
-        <div class="card-row">
-          <span class="card-label">姓名</span>
-          <span class="card-pwd">${a.username}</span>
-          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.username}', '姓名')">复制</button>
-        </div>
-        ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
-        <div class="card-bottom">
-          <span class="date">${
-            currentSeg === 'unregistered' ? `生成日期 ${a.createdAt}` :
-            currentSeg === 'registered' ? `注册日期 ${a.platforms?.[currentPlatform]?.registeredAt || a.createdAt}` :
-            `出售日期 ${a.platforms?.[currentPlatform]?.soldAt || a.createdAt}`
-          }</span>
-          <div style="display:flex;gap:10px;align-items:center">
-            ${actionBtn}
-            <button class="delete-btn" onclick="event.stopPropagation(); deleteAccount('${a.id}')">删除</button>
-          </div>
-        </div>
-      </div>
-    `
-  }).join('')
+  // 渲染三个面板
+  SEGS.forEach((seg, i) => {
+    const container = document.getElementById(`accountList-${i}`)
+    if (container) renderSegPanel(seg, accounts, container)
+  })
 }
 
 function toggleFavorite(id) {
@@ -878,7 +889,7 @@ function showToast(msg) {
 
 // ==================== 下拉刷新 ====================
 function initPullToRefresh() {
-  const list = document.getElementById('accountList')
+  const wrapper = document.getElementById('swipeWrapper')
   const indicator = document.getElementById('pullRefreshIndicator')
   const text = document.getElementById('pullRefreshText')
   const arrow = document.getElementById('pullArrow')
@@ -886,21 +897,25 @@ function initPullToRefresh() {
 
   const THRESHOLD = 50
 
-  list.addEventListener('touchstart', e => {
-    if (list.scrollTop === 0) {
+  const getCurrentPanel = () => {
+    const idx = SEGS.indexOf(currentSeg)
+    return document.getElementById(`accountList-${idx}`)
+  }
+
+  wrapper.addEventListener('touchstart', e => {
+    const panel = getCurrentPanel()
+    if (panel && panel.scrollTop === 0) {
       startY = e.touches[0].clientY
       pulling = true
       triggered = false
     }
   }, { passive: true })
 
-  list.addEventListener('touchmove', e => {
+  wrapper.addEventListener('touchmove', e => {
     if (!pulling) return
     const dy = e.touches[0].clientY - startY
     if (dy <= 0) { pulling = false; return }
-    // 阻止页面原生下拉/回弹，让手势完全由我们接管
     e.preventDefault()
-    // 阻尼：前段轻快(0.65)，超过阈值后变重，给"快到了"的手感
     const resistance = dy < THRESHOLD ? 0.65 : 0.4
     const h = Math.min(dy * resistance, THRESHOLD + 16)
     indicator.style.height = h + 'px'
@@ -914,7 +929,7 @@ function initPullToRefresh() {
     }
   }, { passive: false })
 
-  list.addEventListener('touchend', async () => {
+  wrapper.addEventListener('touchend', async () => {
     if (!pulling) return
     pulling = false
     if (triggered) {
@@ -941,38 +956,62 @@ initPullToRefresh()
 
 // ==================== 左右滑动切换分栏 ====================
 function initSwipeSegment() {
-  const el = document.getElementById('accountList')
-  const SEGS = ['unregistered', 'registered', 'sold']
-  let startX = 0, startY = 0, locked = false
+  const wrapper = document.getElementById('swipeWrapper')
+  const track = document.getElementById('swipeTrack')
+  if (!wrapper || !track) return
 
-  el.addEventListener('touchstart', e => {
+  let startX = 0, startY = 0, curX = 0
+  let dragging = false, dirLocked = false, isHoriz = false
+  const W = () => wrapper.offsetWidth
+
+  wrapper.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX
     startY = e.touches[0].clientY
-    locked = false
+    curX = 0
+    dragging = true
+    dirLocked = false
+    isHoriz = false
+    track.style.transition = 'none'
   }, { passive: true })
 
-  el.addEventListener('touchmove', e => {
-    if (locked) return
+  wrapper.addEventListener('touchmove', e => {
+    if (!dragging) return
     const dx = e.touches[0].clientX - startX
     const dy = e.touches[0].clientY - startY
-    // 水平位移明显大于垂直才触发，避免干扰上下滚动
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-      locked = true
+
+    if (!dirLocked) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+        dirLocked = true
+        isHoriz = Math.abs(dx) > Math.abs(dy)
+      }
     }
+    if (!isHoriz) return
+
+    curX = dx
+    const idx = SEGS.indexOf(currentSeg)
+    // 边界阻尼：到头了继续拖有阻力
+    let resistance = 1
+    if ((idx === 0 && dx > 0) || (idx === SEGS.length - 1 && dx < 0)) {
+      resistance = 0.2
+    }
+    const base = -(idx * W())
+    track.style.transform = `translateX(${base + curX * resistance}px)`
   }, { passive: true })
 
-  el.addEventListener('touchend', e => {
-    if (!locked) return
-    const dx = e.changedTouches[0].clientX - startX
-    const dy = e.changedTouches[0].clientY - startY
-    if (Math.abs(dx) < Math.abs(dy) || Math.abs(dx) < 50) return
+  wrapper.addEventListener('touchend', () => {
+    if (!dragging || !isHoriz) { dragging = false; return }
+    dragging = false
     const idx = SEGS.indexOf(currentSeg)
-    if (dx < 0 && idx < SEGS.length - 1) {
-      // 左滑 → 下一个
+    const threshold = W() * 0.25  // 滑超过25%宽度才切换
+
+    if (curX < -threshold && idx < SEGS.length - 1) {
       switchSeg(SEGS[idx + 1])
-    } else if (dx > 0 && idx > 0) {
-      // 右滑 → 上一个
+    } else if (curX > threshold && idx > 0) {
       switchSeg(SEGS[idx - 1])
+    } else {
+      // 弹回
+      track.style.transition = 'transform 0.32s cubic-bezier(0.25,1,0.5,1)'
+      track.style.transform = `translateX(${-(idx * W())}px)`
     }
   }, { passive: true })
 }
@@ -1047,7 +1086,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.1.5'
+let APP_VERSION = 'V1.1.6'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
