@@ -17,7 +17,8 @@ function migrateAccounts() {
     if (!a.platforms) {
       a.platforms = {
         kiro: { registered: a.registered || false, sold: a.sold || false, registeredAt: a.registeredAt || '', soldAt: a.soldAt || '' },
-        trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+        trae: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+        windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' }
       }
       changed = true
     }
@@ -306,7 +307,7 @@ let currentPlatform = 'kiro'
 
 function switchPlatform(platform) {
   currentPlatform = platform
-  document.querySelectorAll('#plat-kiro, #plat-trae').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#plat-kiro, #plat-trae, #plat-windsurf').forEach(el => el.classList.remove('active'))
   document.getElementById(`plat-${platform}`).classList.add('active')
   renderList()
 }
@@ -479,11 +480,13 @@ function setStatus(id, status) {
   if (!a) return
   if (!a.platforms) a.platforms = {
     kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
-    trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+    trae: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+    windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' }
   }
+  if (!a.platforms.windsurf) a.platforms.windsurf = { registered: false, sold: false, registeredAt: '', soldAt: '' }
 
   const platforms = status === 'registered' || status === 'unregistered'
-    ? ['kiro', 'trae']       // 注册/取消注册 两个平台同步
+    ? ['kiro', 'trae', 'windsurf']       // 注册/取消注册 两个平台同步
     : [currentPlatform]      // 号已出/移回已注册 只影响当前平台
 
   platforms.forEach(p => {
@@ -588,7 +591,8 @@ function generateAccountForDuck(prefix) {
     registered: false,
     platforms: {
       kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
-      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+      windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' }
     },
     createdAt: new Date().toLocaleString('zh-CN')
   }
