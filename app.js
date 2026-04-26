@@ -480,8 +480,8 @@ function setStatus(id, status) {
   if (!a.platforms.windsurf) a.platforms.windsurf = { registered: false, sold: false, registeredAt: '', soldAt: '' }
 
   const platforms = status === 'registered' || status === 'unregistered'
-    ? ['kiro', 'trae', 'windsurf']       // 注册/取消注册 两个平台同步
-    : [currentPlatform]      // 号已出/移回已注册 只影响当前平台
+    ? Object.keys(a.platforms)           // 注册/取消注册 同步该账号实际拥有的平台
+    : [currentPlatform]                  // 号已出/移回已注册 只影响当前平台
 
   platforms.forEach(p => {
     const s = a.platforms[p]
@@ -725,6 +725,12 @@ function refreshField(field) {
 
 function doSaveSingle() {
   if (!previewAccount) return
+  if (currentGenPlatform === 'windsurf') {
+    const email = (document.getElementById('windsurfEmail') || {}).value || previewAccount.email
+    if (!email.trim()) { showToast('请先输入邮箱'); return }
+    previewAccount.email = email.trim()
+    previewAccount.platforms = { windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' } }
+  }
   if (currentGenPlatform === 'duck') {
     const email = (document.getElementById('duckPrefix') || {}).value || ''
     if (!email.trim()) { showToast('请先输入邮箱'); return }
