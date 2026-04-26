@@ -675,6 +675,8 @@ function refreshPreview() {
   }
   previewAccount = generateAccount()
   if (currentGenPlatform === 'windsurf') {
+    // Windsurf 账号的 username 使用 "firstName lastName" 格式
+    previewAccount.username = `${previewAccount.firstName} ${previewAccount.lastName}`
     document.getElementById('previewContentWindsurf').innerHTML = `
       <div class="preview-row">
         <span class="preview-label">账号</span>
@@ -694,14 +696,14 @@ function refreshPreview() {
         <span class="preview-label">姓</span>
         <input id="windsurfFirstName" class="preview-value" value="${previewAccount.firstName}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
-          oninput="previewAccount.firstName=this.value" />
+          oninput="previewAccount.firstName=this.value; previewAccount.username=this.value+' '+previewAccount.lastName" />
         <button class="refresh-field-btn" onclick="refreshField('name')" title="重新生成姓名">↻</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">名</span>
         <input id="windsurfLastName" class="preview-value" value="${previewAccount.lastName}"
           style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
-          oninput="previewAccount.lastName=this.value" />
+          oninput="previewAccount.lastName=this.value; previewAccount.username=previewAccount.firstName+' '+this.value" />
         <button class="refresh-field-btn" onclick="refreshField('name')" title="重新生成姓名">↻</button>
       </div>
     `
@@ -760,7 +762,7 @@ function refreshField(field) {
     const { first, last } = randomName()
     previewAccount.firstName = first
     previewAccount.lastName = last
-    previewAccount.username = generateUsername()
+    previewAccount.username = `${first} ${last}`  // Windsurf 使用 "firstName lastName" 格式
     const firstEl = document.getElementById('windsurfFirstName')
     const lastEl = document.getElementById('windsurfLastName')
     if (firstEl) firstEl.value = first
@@ -777,6 +779,7 @@ function doSaveSingle() {
     previewAccount.password = (document.getElementById('windsurfPwd') || {}).value || previewAccount.password
     previewAccount.firstName = (document.getElementById('windsurfFirstName') || {}).value || previewAccount.firstName
     previewAccount.lastName = (document.getElementById('windsurfLastName') || {}).value || previewAccount.lastName
+    previewAccount.username = `${previewAccount.firstName} ${previewAccount.lastName}`  // 同步更新 username
     previewAccount.platforms = { windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' } }
   }
   if (currentGenPlatform === 'duck') {
@@ -1235,7 +1238,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.7'
+let APP_VERSION = 'V1.2.8'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
