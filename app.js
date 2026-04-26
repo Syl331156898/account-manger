@@ -385,6 +385,15 @@ function renderSegPanel(seg, accounts, container) {
     } else if (seg === 'sold') {
       actionBtn = `<button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">移回已注册</button>`
     }
+    
+    // Windsurf 平台显示姓和名，其他平台显示 username
+    const nameDisplay = currentPlatform === 'windsurf' && a.firstName && a.lastName
+      ? `${a.firstName}  ${a.lastName}`
+      : a.username
+    const nameCopy = currentPlatform === 'windsurf' && a.firstName && a.lastName
+      ? `${a.firstName} ${a.lastName}`
+      : a.username
+    
     return `
       <div class="account-card" onclick="openDetail('${a.id}')">
         <div class="card-row">
@@ -399,8 +408,8 @@ function renderSegPanel(seg, accounts, container) {
         </div>
         <div class="card-row">
           <span class="card-label">姓名</span>
-          <span class="card-pwd">${a.username}</span>
-          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.username}', '姓名')">复制</button>
+          <span class="card-pwd">${nameDisplay}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${nameCopy}', '姓名')">复制</button>
         </div>
         ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
         <div class="card-bottom">
@@ -678,9 +687,13 @@ function refreshPreview() {
         <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
       </div>
       <div class="preview-row">
-        <span class="preview-label">姓名</span>
-        <span id="windsurfUsername" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.username}</span>
-        <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成姓名">↻</button>
+        <span class="preview-label">姓</span>
+        <span id="windsurfFirstName" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.firstName}</span>
+        <button class="refresh-field-btn" onclick="refreshField('name')" title="重新生成姓名">↻</button>
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">名</span>
+        <span id="windsurfLastName" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.lastName}</span>
       </div>
     `
     return
@@ -731,6 +744,16 @@ function refreshField(field) {
     const spanEl = document.getElementById(currentGenPlatform === 'windsurf' ? 'windsurfUsername' : 'previewUsername')
     if (inputEl) inputEl.value = newName
     else if (spanEl) spanEl.textContent = newName
+  } else if (field === 'name') {
+    // Windsurf 专用：重新生成姓名
+    const { first, last } = randomName()
+    previewAccount.firstName = first
+    previewAccount.lastName = last
+    previewAccount.username = generateUsername()
+    const firstEl = document.getElementById('windsurfFirstName')
+    const lastEl = document.getElementById('windsurfLastName')
+    if (firstEl) firstEl.textContent = first
+    if (lastEl) lastEl.textContent = last
   }
 }
 
