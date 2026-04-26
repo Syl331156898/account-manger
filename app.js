@@ -1,3 +1,10 @@
+// ==================== 全局变量 ====================
+let currentPlatform = 'kiro'
+let currentSeg = 'unregistered'
+let selectedTag = ''
+let batchCount = 1
+let currentDetailId = null
+
 // ==================== 云同步数据存储 ====================
 let autoSyncTimer = null
 
@@ -20,6 +27,10 @@ function migrateAccounts() {
         trae: { registered: false, sold: false, registeredAt: '', soldAt: '' },
         windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' }
       }
+      changed = true
+    }
+    if (a.platforms && !a.platforms.windsurf) {
+      a.platforms.windsurf = { registered: false, sold: false, registeredAt: '', soldAt: '' }
       changed = true
     }
   })
@@ -1177,7 +1188,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.4'
+let APP_VERSION = 'V1.2.5'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
