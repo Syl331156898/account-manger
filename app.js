@@ -386,13 +386,19 @@ function renderSegPanel(seg, accounts, container) {
       actionBtn = `<button class="reg-btn" onclick="event.stopPropagation(); setStatus('${a.id}', 'registered')">移回已注册</button>`
     }
     
-    // Windsurf 平台显示姓和名，其他平台显示 username
-    const nameDisplay = currentPlatform === 'windsurf' && a.firstName && a.lastName
-      ? `${a.firstName}  ${a.lastName}`
-      : a.username
-    const nameCopy = currentPlatform === 'windsurf' && a.firstName && a.lastName
-      ? `${a.firstName} ${a.lastName}`
-      : a.username
+    // Windsurf 平台显示 username，但提供单独复制姓和名的按钮
+    const nameRow = currentPlatform === 'windsurf' && a.firstName && a.lastName
+      ? `<div class="card-row">
+          <span class="card-label">姓名</span>
+          <span class="card-pwd">${a.username}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.firstName}', '姓')">姓</button>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.lastName}', '名')">名</button>
+        </div>`
+      : `<div class="card-row">
+          <span class="card-label">姓名</span>
+          <span class="card-pwd">${a.username}</span>
+          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.username}', '姓名')">复制</button>
+        </div>`
     
     return `
       <div class="account-card" onclick="openDetail('${a.id}')">
@@ -406,11 +412,7 @@ function renderSegPanel(seg, accounts, container) {
           <span class="card-pwd">${a.password}</span>
           <button class="inline-copy" onclick="event.stopPropagation(); copyText('${a.password}', '密码')">复制</button>
         </div>
-        <div class="card-row">
-          <span class="card-label">姓名</span>
-          <span class="card-pwd">${nameDisplay}</span>
-          <button class="inline-copy" onclick="event.stopPropagation(); copyText('${nameCopy}', '姓名')">复制</button>
-        </div>
+        ${nameRow}
         ${a.tags.length ? `<div class="tag-list">${a.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>` : ''}
         <div class="card-bottom">
           <span class="date">${
@@ -683,17 +685,24 @@ function refreshPreview() {
       </div>
       <div class="preview-row">
         <span class="preview-label">密码</span>
-        <span id="windsurfPwd" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.password}</span>
+        <input id="windsurfPwd" class="preview-value" value="${previewAccount.password}"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+          oninput="previewAccount.password=this.value" />
         <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">姓</span>
-        <span id="windsurfFirstName" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.firstName}</span>
+        <input id="windsurfFirstName" class="preview-value" value="${previewAccount.firstName}"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+          oninput="previewAccount.firstName=this.value" />
         <button class="refresh-field-btn" onclick="refreshField('name')" title="重新生成姓名">↻</button>
       </div>
       <div class="preview-row">
         <span class="preview-label">名</span>
-        <span id="windsurfLastName" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.lastName}</span>
+        <input id="windsurfLastName" class="preview-value" value="${previewAccount.lastName}"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+          oninput="previewAccount.lastName=this.value" />
+        <button class="refresh-field-btn" onclick="refreshField('name')" title="重新生成姓名">↻</button>
       </div>
     `
     return
@@ -734,8 +743,10 @@ function refreshField(field) {
     const newPwd = generatePassword()
     previewAccount.password = newPwd
     const inputEl = document.getElementById('duckPwd')
-    const spanEl = document.getElementById(currentGenPlatform === 'windsurf' ? 'windsurfPwd' : 'previewPwd')
+    const inputElWindsurf = document.getElementById('windsurfPwd')
+    const spanEl = document.getElementById('previewPwd')
     if (inputEl) inputEl.value = newPwd
+    else if (inputElWindsurf) inputElWindsurf.value = newPwd
     else if (spanEl) spanEl.textContent = newPwd
   } else if (field === 'username') {
     const newName = generateUsername()
@@ -752,8 +763,8 @@ function refreshField(field) {
     previewAccount.username = generateUsername()
     const firstEl = document.getElementById('windsurfFirstName')
     const lastEl = document.getElementById('windsurfLastName')
-    if (firstEl) firstEl.textContent = first
-    if (lastEl) lastEl.textContent = last
+    if (firstEl) firstEl.value = first
+    if (lastEl) lastEl.value = last
   }
 }
 
@@ -763,6 +774,9 @@ function doSaveSingle() {
     const email = (document.getElementById('windsurfEmail') || {}).value || previewAccount.email
     if (!email.trim()) { showToast('请先输入邮箱'); return }
     previewAccount.email = email.trim()
+    previewAccount.password = (document.getElementById('windsurfPwd') || {}).value || previewAccount.password
+    previewAccount.firstName = (document.getElementById('windsurfFirstName') || {}).value || previewAccount.firstName
+    previewAccount.lastName = (document.getElementById('windsurfLastName') || {}).value || previewAccount.lastName
     previewAccount.platforms = { windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' } }
   }
   if (currentGenPlatform === 'duck') {
@@ -833,6 +847,20 @@ function renderDetail() {
   const a = accounts.find(x => x.id === currentDetailId)
   if (!a) return
 
+  // Windsurf 平台显示姓和名，其他平台显示 username
+  const nameRow = currentPlatform === 'windsurf' && a.firstName && a.lastName
+    ? `<div class="info-row">
+        <span class="info-label">姓名</span>
+        <span class="info-value">${a.username}</span>
+        <button class="copy-btn" onclick="copyText('${a.firstName}', '姓')">姓</button>
+        <button class="copy-btn" onclick="copyText('${a.lastName}', '名')">名</button>
+      </div>`
+    : `<div class="info-row">
+        <span class="info-label">姓名</span>
+        <span class="info-value">${a.username}</span>
+        <button class="copy-btn" onclick="copyText('${a.username}', '姓名')">复制</button>
+      </div>`
+
   document.getElementById('detailContent').innerHTML = `
     <div class="info-row">
       <span class="info-label">账号</span>
@@ -844,11 +872,7 @@ function renderDetail() {
       <span class="info-value">${a.password}</span>
       <button class="copy-btn" onclick="copyText('${a.password}', '密码')">复制</button>
     </div>
-    <div class="info-row">
-      <span class="info-label">姓名</span>
-      <span class="info-value">${a.username}</span>
-      <button class="copy-btn" onclick="copyText('${a.username}', '姓名')">复制</button>
-    </div>
+    ${nameRow}
     <div class="info-row">
       <span class="info-label">创建时间</span>
       <span class="info-value" style="font-family:inherit;font-size:12px">${a.createdAt}</span>
@@ -1211,7 +1235,7 @@ function markCurrentRegistered() {
 }
 
 
-let APP_VERSION = 'V1.2.6'
+let APP_VERSION = 'V1.2.7'
 
 // 检查版本更新
 async function checkForUpdate(silent = true) {
