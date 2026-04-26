@@ -292,18 +292,12 @@ function generateAccount() {
     registered: false,
     platforms: {
       kiro: { registered: false, sold: false, registeredAt: '', soldAt: '' },
-      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' }
+      trae: { registered: false, sold: false, registeredAt: '', soldAt: '' },
+      windsurf: { registered: false, sold: false, registeredAt: '', soldAt: '' }
     },
     createdAt: new Date().toLocaleString('zh-CN')
   }
 }
-
-// ==================== 状态 ====================
-let selectedTag = ''
-let batchCount = 1
-let currentDetailId = null
-let currentSeg = 'unregistered'
-let currentPlatform = 'kiro'
 
 function switchPlatform(platform) {
   currentPlatform = platform
@@ -506,18 +500,18 @@ function setStatus(id, status) {
 let previewAccount = null
 let currentGenPlatform = 'duck'
 
-const GEN_SEGS = ['duck', 'github']
+const GEN_SEGS = ['duck', 'github', 'windsurf']
 
 function switchGenSeg(platform, animate = true) {
   currentGenPlatform = platform
-  document.querySelectorAll('#gen-seg-github, #gen-seg-duck').forEach(el => el.classList.remove('active'))
+  document.querySelectorAll('#gen-seg-github, #gen-seg-duck, #gen-seg-windsurf').forEach(el => el.classList.remove('active'))
   document.getElementById(`gen-seg-${platform}`).classList.add('active')
   refreshPreview()
   const idx = GEN_SEGS.indexOf(platform)
   const track = document.getElementById('genSwipeTrack')
   if (track) {
     track.style.transition = animate ? 'transform 0.32s cubic-bezier(0.25,1,0.5,1)' : 'none'
-    track.style.transform = `translateX(-${idx * 50}%)`
+    track.style.transform = `translateX(-${idx * 33.333}%)`
   }
 }
 
@@ -658,6 +652,28 @@ function refreshPreview() {
     return
   }
   previewAccount = generateAccount()
+  if (currentGenPlatform === 'windsurf') {
+    document.getElementById('previewContentWindsurf').innerHTML = `
+      <div class="preview-row">
+        <span class="preview-label">账号</span>
+        <input id="windsurfEmail" class="preview-value" value="${previewAccount.email}"
+          style="border:none;outline:none;background:transparent;text-align:right;flex:1;min-width:0;"
+          oninput="previewAccount.email=this.value" />
+        <button class="refresh-field-btn" onclick="refreshField('email')" title="重新生成账号">↻</button>
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">密码</span>
+        <span id="windsurfPwd" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.password}</span>
+        <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
+      </div>
+      <div class="preview-row">
+        <span class="preview-label">姓名</span>
+        <span id="windsurfUsername" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.username}</span>
+        <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成姓名">↻</button>
+      </div>
+    `
+    return
+  }
   document.getElementById('previewContentGithub').innerHTML = `
     <div class="preview-row">
       <span class="preview-label">账号</span>
@@ -669,12 +685,12 @@ function refreshPreview() {
     <div class="preview-row">
       <span class="preview-label">密码</span>
       <span id="previewPwd" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.password}</span>
-      <button class="refresh-field-btn" onclick="refreshField('password')" title="重新生成密码">↻</button>
+      <button class="refresh-field-btn" onclick="refreshField('password')">↻</button>
     </div>
     <div class="preview-row">
       <span class="preview-label">姓名</span>
       <span id="previewUsername" class="preview-value" style="flex:1;min-width:0;text-align:right;">${previewAccount.username}</span>
-      <button class="refresh-field-btn" onclick="refreshField('username')" title="重新生成姓名">↻</button>
+      <button class="refresh-field-btn" onclick="refreshField('username')">↻</button>
     </div>
   `
 }
@@ -688,20 +704,20 @@ function refreshField(field) {
   if (field === 'email') {
     const newEmail = generateEmail()
     previewAccount.email = newEmail
-    const inputEl = document.getElementById('previewEmail')
+    const inputEl = document.getElementById(currentGenPlatform === 'windsurf' ? 'windsurfEmail' : 'previewEmail')
     if (inputEl) inputEl.value = newEmail
   } else if (field === 'password') {
     const newPwd = generatePassword()
     previewAccount.password = newPwd
     const inputEl = document.getElementById('duckPwd')
-    const spanEl = document.getElementById('previewPwd')
+    const spanEl = document.getElementById(currentGenPlatform === 'windsurf' ? 'windsurfPwd' : 'previewPwd')
     if (inputEl) inputEl.value = newPwd
     else if (spanEl) spanEl.textContent = newPwd
   } else if (field === 'username') {
     const newName = generateUsername()
     previewAccount.username = newName
     const inputEl = document.getElementById('duckUsername')
-    const spanEl = document.getElementById('previewUsername')
+    const spanEl = document.getElementById(currentGenPlatform === 'windsurf' ? 'windsurfUsername' : 'previewUsername')
     if (inputEl) inputEl.value = newName
     else if (spanEl) spanEl.textContent = newName
   }
@@ -735,6 +751,7 @@ function doSaveSingle() {
 
 function doSaveAccounts() {
   if (currentGenPlatform === 'duck') { doSaveSingle(); return }
+  if (currentGenPlatform === 'windsurf') { doSaveSingle(); return }
   const accounts = getAccounts()
   const existing = new Set(accounts.filter(a => !a.registered && !a.sold).map(a => a.email))
   let saved = 0, skipped = 0

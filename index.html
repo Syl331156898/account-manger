@@ -110,12 +110,13 @@
     <div class="seg-control">
       <div class="seg-item active" id="gen-seg-duck" onclick="switchGenSeg('duck')">DuckGo</div>
       <div class="seg-item" id="gen-seg-github" onclick="switchGenSeg('github')">GitHub</div>
+      <div class="seg-item" id="gen-seg-windsurf" onclick="switchGenSeg('windsurf')">Windsurf</div>
     </div>
     <!-- 滑动容器 -->
     <div id="genSwipeWrapper" style="flex:1;overflow:hidden;position:relative;">
-      <div id="genSwipeTrack" style="display:flex;width:200%;height:100%;will-change:transform;transition:none;">
+      <div id="genSwipeTrack" style="display:flex;width:300%;height:100%;will-change:transform;transition:none;">
         <!-- Duck 面板 -->
-        <div class="page-content" id="gen-panel-duck" style="width:50%;flex-shrink:0;">
+        <div class="page-content" id="gen-panel-duck" style="width:33.333%;flex-shrink:0;">
           <div class="card">
             <div class="section-title">预览（姓名、密码自动随机生成）</div>
             <div id="previewContent"></div>
@@ -126,10 +127,21 @@
           </div>
         </div>
         <!-- GitHub 面板 -->
-        <div class="page-content" id="gen-panel-github" style="width:50%;flex-shrink:0;">
+        <div class="page-content" id="gen-panel-github" style="width:33.333%;flex-shrink:0;">
           <div class="card">
             <div class="section-title">预览（姓名、密码自动随机生成）</div>
             <div id="previewContentGithub"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn-outline" style="flex:1;margin-top:0" onclick="refreshPreview()">换一个</button>
+              <button class="btn-outline" style="flex:1;margin-top:0;color:#34c759;border-color:#34c759" onclick="doSaveSingle()">保存账号</button>
+            </div>
+          </div>
+        </div>
+        <!-- Windsurf 面板 -->
+        <div class="page-content" id="gen-panel-windsurf" style="width:33.333%;flex-shrink:0;">
+          <div class="card">
+            <div class="section-title">预览（姓名、密码自动随机生成）</div>
+            <div id="previewContentWindsurf"></div>
             <div style="display:flex;gap:8px;margin-top:12px;">
               <button class="btn-outline" style="flex:1;margin-top:0" onclick="refreshPreview()">换一个</button>
               <button class="btn-outline" style="flex:1;margin-top:0;color:#34c759;border-color:#34c759" onclick="doSaveSingle()">保存账号</button>
